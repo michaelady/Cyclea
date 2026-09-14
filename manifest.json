@@ -1,0 +1,35 @@
+{
+    "name": "Cyclea",
+    "short_name": "Cyclea",
+    "start_url": ".",
+    "display": "standalone",
+    "background_color": "#F7F1ED",
+    "theme_color": "#9A5B6A",
+    "description": "Privacy-respecting menstrual cycle tracker with personal statistics. Not medical advice and not contraception.",
+    "orientation": "portrait-primary",
+    "prefer_related_applications": false,
+    "icons": [
+        {
+            "src": "icons/Icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "icons/Icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        },
+        {
+            "src": "icons/Icon-maskable-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "maskable"
+        },
+        {
+            "src": "icons/Icon-maskable-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
+        }
+    ]
+}

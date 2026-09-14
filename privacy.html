@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cyclea privacy</title>
+  <style>
+    :root {
+      --bg: #f7f1ed;
+      --ink: #2f2a2b;
+      --muted: #6f6567;
+      --rose: #9a5b6a;
+    }
+    body {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.55;
+    }
+    main {
+      max-width: 42rem;
+      margin: 0 auto;
+      padding: 3rem 1.4rem 4rem;
+    }
+    h1 { font-weight: 600; font-size: 2rem; }
+    h2 { font-size: 1.2rem; margin-top: 2rem; }
+    p, li { font-family: system-ui, sans-serif; color: var(--ink); }
+    a { color: var(--rose); }
+    .muted { color: var(--muted); font-family: system-ui, sans-serif; font-size: 0.95rem; }
+  </style>
+</head>
+<body>
+  <main>
+    <p class="muted"><a href="./">← Cyclea</a></p>
+    <h1>Privacy</h1>
+    <p class="muted">Last updated: 14 September 2026</p>
+    <p>Cyclea is a menstrual cycle tracker. It does not show ads and it does not sell health data.</p>
+
+    <h2>What we store</h2>
+    <p>In <strong>guest mode</strong>, period days, flow, symptoms, notes, theme, and disclaimer acceptance stay on this device (Hive / IndexedDB in the browser, or local app storage on Android). Nothing is sent to a Cyclea server because there is no Cyclea backend besides the optional Firebase project you configure.</p>
+    <p>If a maintainer enables <strong>Google Sign-In</strong>, logs can sync to Cloud Firestore under <code>users/{your user id}/logs/</code> in that Firebase project. Authentication is handled by Google / Firebase Auth.</p>
+
+    <h2>What we do not do</h2>
+    <ul>
+      <li>No advertising SDKs.</li>
+      <li>No sale of cycle, symptom, or account data.</li>
+      <li>No community graph, partner sharing, or wearable ingestion in Phase 1.</li>
+    </ul>
+
+    <h2>Your controls</h2>
+    <p>Use <strong>Settings → Delete all Cyclea data</strong> to wipe local logs. If you are signed in, that action also deletes your Cyclea Firestore log documents. You can sign out without deleting local data. You may also delete the Firebase user in Google’s account tools if the project owner enabled Google Auth.</p>
+
+    <h2>Health information</h2>
+    <p>Cycle and symptom logs are sensitive. Treat a shared device as untrusted: use OS user profiles or sign out, and use Delete all before handing a phone over. Cyclea is not a covered medical-records system and is not HIPAA-certified.</p>
+
+    <h2>Web hosting</h2>
+    <p>The static web app may be hosted on GitHub Pages. GitHub’s own logs (IP addresses for downloads) are governed by GitHub’s privacy policy, not by Cyclea.</p>
+
+    <h2>Contact</h2>
+    <p>Questions about this notice can be opened as a GitHub issue on the Cyclea repository.</p>
+  </main>
+</body>
+</html>
