@@ -67,7 +67,7 @@ class AdviceEngine {
           id: 'timing',
           title: 'On-time vs early vs late',
           body:
-              '$onTimePct% of your logged cycles landed within ±${stats.onTimeWindowDays} days of your own average. '
+              '$onTimePct% of your logged cycles landed within plus or minus ${stats.onTimeWindowDays} days of your own average. '
               'Early and late here only means compared with you — not a diagnosis.',
           tag: 'Your stats',
         ),

@@ -200,7 +200,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
       return 'Inside the estimated fertile window (not contraception).';
     }
     if (controller.prediction.isPredictedPeriod(day)) {
-      return 'Predicted period day (±${controller.prediction.uncertaintyDays} day uncertainty).';
+      return 'Predicted period day (about ${controller.prediction.uncertaintyDays} days of uncertainty).';
     }
     if (log != null) return 'Symptoms or notes logged.';
     return 'No log yet. Tap Add log to edit this day.';

@@ -77,7 +77,7 @@ class InsightsScreen extends StatelessWidget {
                     Text('Early · on-time · late', style: Theme.of(context).textTheme.titleLarge),
                     const SizedBox(height: 6),
                     Text(
-                      'Compared with your own average, counting a cycle as on-time when it is within ±${stats.onTimeWindowDays} days. This is a personal rhythm score, not a medical grade.',
+                      'Compared with your own average, counting a cycle as on-time when it is within plus or minus ${stats.onTimeWindowDays} days. This is a personal rhythm score, not a medical grade.',
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
                     const SizedBox(height: 12),

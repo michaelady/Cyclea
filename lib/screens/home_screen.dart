@@ -116,8 +116,9 @@ class HomeScreen extends StatelessWidget {
                       child: _ForecastBlock(
                         title: 'Next period',
                         value: _nextPeriodLabel(prediction),
-                        caption:
-                            '${prediction.confidence.label} · ±${prediction.uncertaintyDays} days',
+                        caption: prediction.nextPeriodStart == null
+                            ? prediction.confidence.label
+                            : '${prediction.confidence.label} · about ${prediction.uncertaintyDays} days of uncertainty',
                       ),
                     ),
                   ),
