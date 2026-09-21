@@ -29,3 +29,10 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  fonts:
+    - family: Fraunces
+      fonts:
+        - asset: fonts/Fraunces.ttf
+    - family: Figtree
+      fonts:
+        - asset: fonts/Figtree.ttf

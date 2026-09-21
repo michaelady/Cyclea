@@ -1,5 +1,5 @@
 import 'package:cyclea/screens/app_shell.dart';
-import 'package:cyclea/screens/disclaimer_gate.dart';
+import 'package:cyclea/screens/welcome_screen.dart';
 import 'package:cyclea/state/cycle_controller.dart';
 import 'package:cyclea/theme/cyclea_theme.dart';
 import 'package:flutter/material.dart';
@@ -29,7 +29,7 @@ class CycleaApp extends StatelessWidget {
                 ? const Scaffold(body: Center(child: CircularProgressIndicator()))
                 : controller.disclaimerAccepted
                 ? const AppShell()
-                : const DisclaimerGate(),
+                : const WelcomeScreen(),
           );
         },
       ),

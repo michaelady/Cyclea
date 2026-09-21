@@ -4,7 +4,7 @@ Use guest mode first (no Firebase keys required). Seeded demo data is the fastes
 
 ## Guest / local
 
-- [ ] First launch shows the full medical / contraception disclaimer. The app does not enter Home until **I understand — continue**.
+- [ ] First launch shows the full medical / contraception disclaimer plus **Continue as guest** and **Continue with Google**. Guest enters Home. Google with placeholder Firebase shows a setup dialog instead of crashing.
 - [ ] Home, Calendar, and Insights still show a short disclaimer strip after acceptance.
 - [ ] Settings repeats the full disclaimer and privacy summary.
 - [ ] With empty data, Home asks you to log a period and does not invent a confident next-period date.
@@ -23,7 +23,7 @@ Use guest mode first (no Firebase keys required). Seeded demo data is the fastes
 
 ## Google Sign-In (only after Firebase config)
 
-- [ ] Settings shows **Continue with Google** when `lib/firebase_options.dart` is configured; otherwise it explains guest-only mode.
+- [ ] Settings shows **Continue as guest** and **Continue with Google** in guest mode. If `lib/firebase_options.dart` is still placeholders, Google explains that Firebase must be configured. After real config, web and Android sign-in work as below.
 - [ ] Web sign-in popup works on `localhost` and on `michaelady.github.io` after authorized domains / OAuth origins are set.
 - [ ] Android sign-in works on a device/emulator with `google-services.json` and SHA-1 registered.
 - [ ] After sign-in, a log created as guest appears in Firestore `users/{uid}/logs/{date}`.

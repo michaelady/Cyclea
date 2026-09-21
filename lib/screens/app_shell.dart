@@ -2,6 +2,7 @@ import 'package:cyclea/screens/calendar_screen.dart';
 import 'package:cyclea/screens/home_screen.dart';
 import 'package:cyclea/screens/insights_screen.dart';
 import 'package:cyclea/screens/settings_screen.dart';
+import 'package:cyclea/theme/cyclea_icons.dart';
 import 'package:cyclea/theme/cyclea_theme.dart';
 import 'package:flutter/material.dart';
 
@@ -23,21 +24,48 @@ class _AppShellState extends State<AppShell> {
   ];
 
   static const _destinations = [
-    NavigationDestination(icon: Icon(Icons.spa_outlined), selectedIcon: Icon(Icons.spa), label: 'Home'),
     NavigationDestination(
-      icon: Icon(Icons.calendar_month_outlined),
-      selectedIcon: Icon(Icons.calendar_month),
+      icon: CycleaIcon(CycleaGlyph.blossom, semanticLabel: 'Home'),
+      selectedIcon: CycleaIcon(CycleaGlyph.blossom, filled: true, semanticLabel: 'Home'),
+      label: 'Home',
+    ),
+    NavigationDestination(
+      icon: CycleaIcon(CycleaGlyph.calendarBloom, semanticLabel: 'Calendar'),
+      selectedIcon: CycleaIcon(CycleaGlyph.calendarBloom, filled: true, semanticLabel: 'Calendar'),
       label: 'Calendar',
     ),
     NavigationDestination(
-      icon: Icon(Icons.insights_outlined),
-      selectedIcon: Icon(Icons.insights),
+      icon: CycleaIcon(CycleaGlyph.sprout, semanticLabel: 'Insights'),
+      selectedIcon: CycleaIcon(CycleaGlyph.sprout, filled: true, semanticLabel: 'Insights'),
       label: 'Insights',
     ),
     NavigationDestination(
-      icon: Icon(Icons.settings_outlined),
-      selectedIcon: Icon(Icons.settings),
+      icon: CycleaIcon(CycleaGlyph.moon, semanticLabel: 'Settings'),
+      selectedIcon: CycleaIcon(CycleaGlyph.moon, filled: true, semanticLabel: 'Settings'),
       label: 'Settings',
+    ),
+  ];
+
+  static const _rail = [
+    NavigationRailDestination(
+      icon: CycleaIcon(CycleaGlyph.blossom),
+      selectedIcon: CycleaIcon(CycleaGlyph.blossom, filled: true),
+      label: Text('Home'),
+    ),
+    NavigationRailDestination(
+      icon: CycleaIcon(CycleaGlyph.calendarBloom),
+      selectedIcon: CycleaIcon(CycleaGlyph.calendarBloom, filled: true),
+      label: Text('Calendar'),
+    ),
+    NavigationRailDestination(
+      icon: CycleaIcon(CycleaGlyph.sprout),
+      selectedIcon: CycleaIcon(CycleaGlyph.sprout, filled: true),
+      label: Text('Insights'),
+    ),
+    NavigationRailDestination(
+      icon: CycleaIcon(CycleaGlyph.moon),
+      selectedIcon: CycleaIcon(CycleaGlyph.moon, filled: true),
+      label: Text('Settings'),
     ),
   ];
 
@@ -56,15 +84,7 @@ class _AppShellState extends State<AppShell> {
               selectedIndex: _index,
               onDestinationSelected: (value) => setState(() => _index = value),
               labelType: NavigationRailLabelType.all,
-              destinations: const [
-                NavigationRailDestination(icon: Icon(Icons.spa_outlined), label: Text('Home')),
-                NavigationRailDestination(
-                  icon: Icon(Icons.calendar_month_outlined),
-                  label: Text('Calendar'),
-                ),
-                NavigationRailDestination(icon: Icon(Icons.insights_outlined), label: Text('Insights')),
-                NavigationRailDestination(icon: Icon(Icons.settings_outlined), label: Text('Settings')),
-              ],
+              destinations: _rail,
             ),
             const VerticalDivider(width: 1),
             Expanded(child: body),

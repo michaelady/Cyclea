@@ -3,6 +3,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
+class FirebaseNotConfiguredException implements Exception {
+  const FirebaseNotConfiguredException();
+
+  @override
+  String toString() =>
+      'Firebase is not configured on this build. Guest mode still works.';
+}
+
 class AuthUser {
   const AuthUser({
     required this.uid,
@@ -62,7 +70,7 @@ class AuthService {
   Future<AuthUser?> signInWithGoogle() async {
     final auth = _auth;
     if (auth == null) {
-      throw StateError('Firebase is not configured on this build.');
+      throw const FirebaseNotConfiguredException();
     }
 
     if (kIsWeb) {

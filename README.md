@@ -27,7 +27,7 @@ Cyclea’s bet: stay small, calm, and honest about uncertainty, and make **your*
 
 ## What Phase 1 includes
 
-1. **Auth and sync** — Google Sign-In on web + Android via Firebase Auth and Cloud Firestore when config is present. **Guest mode** works fully with Hive on-device storage if keys are missing.
+1. **Auth and sync** — Welcome and Settings both offer **Continue as guest** and **Continue with Google**. Google is optional. Guest mode works fully with Hive on-device storage. The Google button is always visible; if Firebase config is still a placeholder, tapping it explains what to add instead of crashing. When config is real, Google Sign-In uses Firebase Auth and Cloud Firestore.
 2. **Tracking** — Calendar logging of period start/end, flow (spotting / light / medium / heavy), and ~24 symptoms. Edit or delete any day. Range picker for a whole period.
 3. **Predictions** — Next period and fertile window from logged cycle starts. Uncertainty widens for short histories and irregular cycles. Disclaimers on Home, Calendar, Insights, Settings, and this README.
 4. **Insights** — Average cycle length, variability, early vs on-time vs late (±2 days from *your* average), symptoms by phase, educational advice cards.
@@ -52,19 +52,26 @@ flutter run -d android
 
 Guest mode is the default until Firebase options are filled in. Use **Settings → Seed demo data** to populate ~six months of slightly irregular cycles.
 
+The UI uses a warm botanical look (Fraunces headings, Figtree body, custom blossom / petal / sprout / moon icons). Google Sign-In is always offered next to guest; it only completes after Firebase is configured.
+
+
 ## Firebase setup (optional)
 
-Guest logging, predictions, and Insights work **without** Firebase. Add config only when you want Google Sign-In and cloud sync.
+Guest logging, predictions, and Insights work **without** Firebase. Add config only when you want Google Sign-In and cloud sync. Until then the **Continue with Google** button still appears on Welcome and Settings; tapping it explains that Firebase is not configured yet.
 
-1. Create a Firebase project and enable **Google** as an Auth sign-in provider.
-2. Add apps:
-   - **Web** — authorized domains must include `localhost` and `michaelady.github.io`.
-   - **Android** — package name `com.cyclea.app`. Add your debug and release SHA-1 / SHA-256 fingerprints (`keytool -list -v -keystore ~/.android/debug.keystore` for debug).
+### What Adrian must add for Google login to complete
+
+1. Create a Firebase project (any name is fine). Enable **Authentication → Sign-in method → Google**.
+2. Add apps in the Firebase console:
+   - **Web** — authorized domains must include `localhost` and `michaelady.github.io` (GitHub Pages host, no path).
+   - **Android** — package name `com.cyclea.app`. Add debug and release **SHA-1** and **SHA-256** fingerprints (`keytool -list -v -keystore ~/.android/debug.keystore` for debug; Play App Signing for release).
 3. Create a Cloud Firestore database (production or nam-id mode is fine). Publish rules such as [`firestore.rules`](firestore.rules) so users can only read and write `users/{uid}/**`.
-4. Fill in [`lib/firebase_options.dart`](lib/firebase_options.dart) (or run `dart pub global activate flutterfire_cli` then `flutterfire configure` and keep web + android). Replace every `YOUR_*` placeholder. `DefaultFirebaseOptions.isConfigured` stays false until those values look real, so a half-edited file will not crash guest mode.
+4. Fill in [`lib/firebase_options.dart`](lib/firebase_options.dart) (or run `dart pub global activate flutterfire_cli` then `flutterfire configure` and keep web + android). Replace every `YOUR_*` placeholder: `apiKey`, `appId`, `messagingSenderId`, `projectId`, `authDomain`, `storageBucket`, and `webClientId`. `DefaultFirebaseOptions.isConfigured` stays false until those values look real, so a half-edited file will not crash guest mode.
 5. Android: download `google-services.json` into `android/app/google-services.json` (gitignored). The Gradle plugin is applied **only if that file exists**, so debug APKs still build for testers without Firebase.
-6. Web OAuth client: in Google Cloud Console, create a Web client ID. Add `https://michaelady.github.io` and `https://michaelady.github.io/Cyclea/` (and `http://localhost`) to Authorized JavaScript origins. Add `https://michaelady.github.io/Cyclea/` and `http://localhost:**` to Authorized redirect URIs as required by Firebase Auth.
-7. Rebuild. Settings will show **Continue with Google**. First sign-in merges local Hive logs with Firestore using last-write-wins on `updatedAt`.
+6. Google Cloud Console OAuth clients:
+   - **Web client ID** — Authorized JavaScript origins: `http://localhost`, `http://localhost:5000` (and any port you use), `https://michaelady.github.io`. Authorized redirect URIs: `https://michaelady.github.io/Cyclea/`, `https://michaelady.github.io/__/auth/handler`, and the matching localhost Firebase auth handler.
+   - **Android client ID** — package `com.cyclea.app` plus the SHA fingerprints from step 2.
+7. Rebuild. Welcome and Settings will complete **Continue with Google**. First sign-in merges local Hive logs with Firestore using last-write-wins on `updatedAt`. **Sign out** returns the account chip to Guest; logs are not wiped unless the user deletes them.
 
 Do not commit real API keys you consider secret if your org policy forbids it. Firebase web keys are still project identifiers — restrict domains and Firestore rules.
 

@@ -207,10 +207,14 @@ class CycleController extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> signIn() async {
+  Future<AuthUser?> signIn() async {
+    if (!firebaseReady) {
+      throw const FirebaseNotConfiguredException();
+    }
     try {
-      await auth.signInWithGoogle();
+      final user = await auth.signInWithGoogle();
       _error = null;
+      return user;
     } catch (error) {
       _error = 'Google sign-in failed: $error';
       notifyListeners();
