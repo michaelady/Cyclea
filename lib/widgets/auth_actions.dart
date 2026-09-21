@@ -5,12 +5,10 @@ import 'package:cyclea/theme/cyclea_theme.dart';
 import 'package:flutter/material.dart';
 
 class AuthCopy {
-  static const firebaseNeededTitle = 'Google Sign-In needs Firebase';
+  static const firebaseNeededTitle = 'Google Sign-In is unavailable';
 
   static const firebaseNeededBody =
-      'This build still has placeholder Firebase keys, so Google Sign-In cannot complete yet. Guest mode stays fully usable on this device.\n\n'
-      'To enable it, add a Firebase project with Google Auth, real values in lib/firebase_options.dart, '
-      'google-services.json for Android, OAuth client IDs, and authorized domains for localhost and michaelady.github.io. See the README.';
+      'Firebase did not start on this session, so Google Sign-In cannot complete. Guest mode stays fully usable on this device. See the README if this continues after a rebuild.';
 
   static const guestHint = 'Guest mode works fully on this device. You can sign in later from Settings.';
 }
@@ -132,7 +130,11 @@ Future<bool> handleGoogleSignIn(BuildContext context, CycleController controller
   } catch (error) {
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Sign-in failed: $error')),
+        SnackBar(
+          content: Text(
+            'Google Sign-In failed. You can keep using guest. ($error)',
+          ),
+        ),
       );
     }
     return false;

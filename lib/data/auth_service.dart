@@ -1,4 +1,5 @@
 import 'package:cyclea/data/firebase_gate.dart';
+import 'package:cyclea/firebase_options.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -39,7 +40,10 @@ class AuthService {
            googleSignIn ??
            (kIsWeb || !gate.ready
                ? null
-               : GoogleSignIn(scopes: const ['email']));
+               : GoogleSignIn(
+                   scopes: const ['email'],
+                   serverClientId: DefaultFirebaseOptions.webClientId,
+                 ));
 
   AuthService._disabled()
     : gate = FirebaseGate.disabled,
@@ -82,7 +86,12 @@ class AuthService {
       return user == null ? null : AuthUser.fromFirebase(user);
     }
 
-    final google = _googleSignIn ?? GoogleSignIn(scopes: const ['email']);
+    final google =
+        _googleSignIn ??
+        GoogleSignIn(
+          scopes: const ['email'],
+          serverClientId: DefaultFirebaseOptions.webClientId,
+        );
     final googleUser = await google.signIn();
     if (googleUser == null) return null;
     final googleAuth = await googleUser.authentication;

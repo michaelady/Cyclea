@@ -63,7 +63,7 @@ void main() {
     await tester.tap(find.text('Continue with Google'));
     await tester.pumpAndSettle();
     expect(find.text(AuthCopy.firebaseNeededTitle), findsOneWidget);
-    expect(find.textContaining('placeholder Firebase keys'), findsOneWidget);
+    expect(find.textContaining('Guest mode stays fully usable'), findsOneWidget);
   });
 
   testWidgets('seeded demo data shows insights averages', (tester) async {
