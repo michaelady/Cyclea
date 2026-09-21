@@ -1,8 +1,12 @@
 import 'package:cyclea/domain/prediction.dart';
 import 'package:cyclea/domain/symptom.dart';
 import 'package:cyclea/state/cycle_controller.dart';
+import 'package:cyclea/theme/cyclea_decor.dart';
+import 'package:cyclea/theme/cyclea_icons.dart';
+import 'package:cyclea/theme/cyclea_theme.dart';
 import 'package:cyclea/widgets/advice_card_view.dart';
 import 'package:cyclea/widgets/cycle_ring.dart';
+import 'package:cyclea/widgets/cyclea_empty_state.dart';
 import 'package:cyclea/widgets/disclaimer_banner.dart';
 import 'package:cyclea/widgets/log_editor_sheet.dart';
 import 'package:cyclea/widgets/phase_chip.dart';
@@ -40,7 +44,8 @@ class HomeScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Cyclea', style: Theme.of(context).textTheme.headlineMedium),
+                        const CycleaWordmark(),
+                        const SizedBox(height: 4),
                         Text(
                           '$hello · ${DateFormat.MMMEd().format(today)}',
                           style: Theme.of(context).textTheme.bodyMedium,
@@ -50,9 +55,11 @@ class HomeScreen extends StatelessWidget {
                   ),
                   Chip(
                     label: Text(controller.isGuest ? 'Guest' : 'Synced'),
-                    avatar: Icon(
-                      controller.isGuest ? Icons.visibility_off_outlined : Icons.cloud_done_outlined,
+                    avatar: CycleaIcon(
+                      controller.isGuest ? CycleaGlyph.guest : CycleaGlyph.cloudLeaf,
+                      filled: true,
                       size: 16,
+                      color: controller.isGuest ? CycleaColors.lilac : CycleaColors.sage,
                     ),
                   ),
                 ],
@@ -60,7 +67,7 @@ class HomeScreen extends StatelessWidget {
               const SizedBox(height: 12),
               const DisclaimerBanner(),
               const SizedBox(height: 20),
-              SurfaceCard(
+              BloomHero(
                 child: LayoutBuilder(
                   builder: (context, constraints) {
                     final stack = constraints.maxWidth < 420;
@@ -76,7 +83,7 @@ class HomeScreen extends StatelessWidget {
                         const SizedBox(height: 8),
                         Text(
                           prediction.cycleDay == null
-                              ? 'Log a period start to see cycle day and estimates.'
+                              ? 'Log a period start to open the bloom and see cycle day estimates.'
                               : 'Day ${prediction.cycleDay} of a typical ${prediction.expectedCycleLength}-day cycle for you.',
                           style: Theme.of(context).textTheme.bodyMedium,
                         ),
@@ -114,6 +121,7 @@ class HomeScreen extends StatelessWidget {
                   Expanded(
                     child: SurfaceCard(
                       child: _ForecastBlock(
+                        glyph: CycleaGlyph.drop,
                         title: 'Next period',
                         value: _nextPeriodLabel(prediction),
                         caption: prediction.nextPeriodStart == null
@@ -126,6 +134,7 @@ class HomeScreen extends StatelessWidget {
                   Expanded(
                     child: SurfaceCard(
                       child: _ForecastBlock(
+                        glyph: CycleaGlyph.blossom,
                         title: 'Fertile window',
                         value: _fertileLabel(prediction),
                         caption: 'Calendar estimate only',
@@ -135,27 +144,34 @@ class HomeScreen extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 12),
-              SurfaceCard(
-                onTap: () => showLogEditor(context, date: today),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Text('Today', style: Theme.of(context).textTheme.titleLarge),
-                        const Spacer(),
-                        TextButton(
-                          onPressed: () => showLogEditor(context, date: today),
-                          child: Text(todayLog == null ? 'Log today' : 'Edit today'),
-                        ),
-                      ],
-                    ),
-                    if (todayLog == null)
-                      Text(
-                        'No symptoms or flow logged yet for today.',
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      )
-                    else ...[
+              if (todayLog == null)
+                CycleaEmptyState(
+                  glyph: CycleaGlyph.petal,
+                  title: 'Today is still a blank page',
+                  body: 'Log flow, a few symptoms, or a quiet note. Nothing is required — this stays on-device in guest mode.',
+                  action: FilledButton.tonal(
+                    onPressed: () => showLogEditor(context, date: today),
+                    child: const Text('Log today'),
+                  ),
+                )
+              else
+                SurfaceCard(
+                  onTap: () => showLogEditor(context, date: today),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          const CycleaIcon(CycleaGlyph.sun, filled: true, size: 18),
+                          const SizedBox(width: 8),
+                          Text('Today', style: Theme.of(context).textTheme.titleLarge),
+                          const Spacer(),
+                          TextButton(
+                            onPressed: () => showLogEditor(context, date: today),
+                            child: const Text('Edit today'),
+                          ),
+                        ],
+                      ),
                       if (todayLog.isPeriod)
                         Text(
                           'Period · ${todayLog.flow.label} flow',
@@ -168,7 +184,10 @@ class HomeScreen extends StatelessWidget {
                           runSpacing: 8,
                           children: [
                             for (final id in todayLog.symptomIds)
-                              Chip(label: Text(SymptomCatalog.labelFor(id))),
+                              IconLabelChip(
+                                glyph: glyphForSymptom(id),
+                                label: SymptomCatalog.labelFor(id),
+                              ),
                           ],
                         ),
                       ],
@@ -177,9 +196,8 @@ class HomeScreen extends StatelessWidget {
                         Text(todayLog.notes, style: Theme.of(context).textTheme.bodySmall),
                       ],
                     ],
-                  ],
+                  ),
                 ),
-              ),
               const SizedBox(height: 16),
               Text('Advice', style: Theme.of(context).textTheme.headlineSmall),
               const SizedBox(height: 4),
@@ -218,11 +236,13 @@ class HomeScreen extends StatelessWidget {
 
 class _ForecastBlock extends StatelessWidget {
   const _ForecastBlock({
+    required this.glyph,
     required this.title,
     required this.value,
     required this.caption,
   });
 
+  final CycleaGlyph glyph;
   final String title;
   final String value;
   final String caption;
@@ -232,7 +252,13 @@ class _ForecastBlock extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(title, style: Theme.of(context).textTheme.bodySmall),
+        Row(
+          children: [
+            CycleaIcon(glyph, filled: true, size: 16, color: Theme.of(context).colorScheme.primary),
+            const SizedBox(width: 6),
+            Text(title, style: Theme.of(context).textTheme.bodySmall),
+          ],
+        ),
         const SizedBox(height: 6),
         Text(value, style: Theme.of(context).textTheme.titleLarge),
         const SizedBox(height: 4),

@@ -3,6 +3,7 @@ import 'package:cyclea/domain/dates.dart';
 import 'package:cyclea/domain/flow_level.dart';
 import 'package:cyclea/domain/symptom.dart';
 import 'package:cyclea/state/cycle_controller.dart';
+import 'package:cyclea/theme/cyclea_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -94,6 +95,7 @@ class _LogEditorSheetState extends State<LogEditorSheet> {
               contentPadding: EdgeInsets.zero,
               title: const Text('Period day'),
               subtitle: const Text('Start, middle, or end of bleeding'),
+              secondary: const CycleaIcon(CycleaGlyph.drop, filled: true, size: 22),
               value: _period,
               onChanged: (value) => setState(() {
                 _period = value;
@@ -110,6 +112,11 @@ class _LogEditorSheetState extends State<LogEditorSheet> {
                 children: [
                   for (final level in FlowLevel.values.where((item) => item != FlowLevel.none))
                     ChoiceChip(
+                      avatar: CycleaIcon(
+                        CycleaGlyph.drop,
+                        filled: _flow == level,
+                        size: 14,
+                      ),
                       label: Text(level.label),
                       selected: _flow == level,
                       onSelected: (_) => setState(() => _flow = level),
@@ -166,6 +173,11 @@ class _LogEditorSheetState extends State<LogEditorSheet> {
             children: [
               for (final item in items)
                 FilterChip(
+                  avatar: CycleaIcon(
+                    glyphForSymptom(item.id),
+                    filled: _symptoms.contains(item.id),
+                    size: 16,
+                  ),
                   label: Text(item.label),
                   selected: _symptoms.contains(item.id),
                   onSelected: (selected) {

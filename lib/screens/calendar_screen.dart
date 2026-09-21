@@ -1,5 +1,6 @@
 import 'package:cyclea/domain/dates.dart';
 import 'package:cyclea/state/cycle_controller.dart';
+import 'package:cyclea/theme/cyclea_icons.dart';
 import 'package:cyclea/theme/cyclea_theme.dart';
 import 'package:cyclea/widgets/disclaimer_banner.dart';
 import 'package:cyclea/widgets/log_editor_sheet.dart';
@@ -45,6 +46,13 @@ class _CalendarScreenState extends State<CalendarScreen> {
             children: [
               Row(
                 children: [
+                  CycleaIcon(
+                    CycleaGlyph.calendarBloom,
+                    filled: true,
+                    size: 28,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  const SizedBox(width: 10),
                   Expanded(
                     child: Text('Calendar', style: Theme.of(context).textTheme.headlineMedium),
                   ),
@@ -99,9 +107,22 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      DateFormat.yMMMMEEEEd().format(_selected),
-                      style: Theme.of(context).textTheme.titleLarge,
+                    Row(
+                      children: [
+                        CycleaIcon(
+                          CycleaGlyph.petal,
+                          filled: true,
+                          size: 18,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            DateFormat.yMMMMEEEEd().format(_selected),
+                            style: Theme.of(context).textTheme.titleLarge,
+                          ),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 6),
                     Text(_statusLine(controller, _selected), style: Theme.of(context).textTheme.bodyMedium),

@@ -1,8 +1,10 @@
 import 'package:cyclea/domain/cycle_phase.dart';
 import 'package:cyclea/domain/symptom.dart';
 import 'package:cyclea/state/cycle_controller.dart';
+import 'package:cyclea/theme/cyclea_icons.dart';
 import 'package:cyclea/theme/cyclea_theme.dart';
 import 'package:cyclea/widgets/advice_card_view.dart';
+import 'package:cyclea/widgets/cyclea_empty_state.dart';
 import 'package:cyclea/widgets/disclaimer_banner.dart';
 import 'package:cyclea/widgets/stat_card.dart';
 import 'package:flutter/material.dart';
@@ -25,7 +27,18 @@ class InsightsScreen extends StatelessWidget {
           child: ListView(
             padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
             children: [
-              Text('Insights', style: Theme.of(context).textTheme.headlineMedium),
+              Row(
+                children: [
+                  CycleaIcon(
+                    CycleaGlyph.sprout,
+                    filled: true,
+                    size: 28,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  const SizedBox(width: 10),
+                  Text('Insights', style: Theme.of(context).textTheme.headlineMedium),
+                ],
+              ),
               const SizedBox(height: 4),
               Text(
                 'Personal statistics from your logs, plus short educational advice. Not a diagnosis.',
@@ -34,9 +47,19 @@ class InsightsScreen extends StatelessWidget {
               const SizedBox(height: 12),
               const DisclaimerBanner(),
               const SizedBox(height: 16),
+              if (stats.completeCycleCount == 0) ...[
+                const CycleaEmptyState(
+                  glyph: CycleaGlyph.sprout,
+                  title: 'Your pattern will grow here',
+                  body:
+                      'Log at least two period starts to see averages, variability, and early/on-time/late rhythm. Seeded demo data in Settings is the fastest way to preview.',
+                ),
+                const SizedBox(height: 16),
+              ],
               Row(
                 children: [
                   StatCard(
+                    glyph: CycleaGlyph.blossom,
                     label: 'Average cycle',
                     value: avg == null ? '—' : '${avg.toStringAsFixed(1)}d',
                     caption: stats.completeCycleCount == 0
@@ -45,6 +68,7 @@ class InsightsScreen extends StatelessWidget {
                   ),
                   const SizedBox(width: 12),
                   StatCard(
+                    glyph: CycleaGlyph.spark,
                     label: 'Variability',
                     value: sd == null ? '—' : '±${sd.toStringAsFixed(1)}',
                     caption: stats.irregular ? 'Wider than usual' : 'Sample std. dev.',
@@ -55,6 +79,7 @@ class InsightsScreen extends StatelessWidget {
               Row(
                 children: [
                   StatCard(
+                    glyph: CycleaGlyph.drop,
                     label: 'Period length',
                     value: stats.averagePeriodLength == null
                         ? '—'
@@ -63,6 +88,7 @@ class InsightsScreen extends StatelessWidget {
                   ),
                   const SizedBox(width: 12),
                   StatCard(
+                    glyph: CycleaGlyph.moon,
                     label: 'Range',
                     value: stats.minCycle == null ? '—' : '${stats.minCycle}–${stats.maxCycle}',
                     caption: 'Shortest to longest',
@@ -74,7 +100,18 @@ class InsightsScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Early · on-time · late', style: Theme.of(context).textTheme.titleLarge),
+                    Row(
+                      children: [
+                        CycleaIcon(
+                          CycleaGlyph.leaf,
+                          filled: true,
+                          size: 18,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        const SizedBox(width: 8),
+                        Text('Early · on-time · late', style: Theme.of(context).textTheme.titleLarge),
+                      ],
+                    ),
                     const SizedBox(height: 6),
                     Text(
                       'Compared with your own average, counting a cycle as on-time when it is within plus or minus ${stats.onTimeWindowDays} days. This is a personal rhythm score, not a medical grade.',
@@ -88,16 +125,19 @@ class InsightsScreen extends StatelessWidget {
                       )
                     else ...[
                       FrequencyBar(
+                        glyph: CycleaGlyph.sprout,
                         label: 'Early',
                         value: stats.earlyRate,
                         color: CycleaColors.sand,
                       ),
                       FrequencyBar(
+                        glyph: CycleaGlyph.blossom,
                         label: 'On-time',
                         value: stats.onTimeRate,
                         color: CycleaColors.sage,
                       ),
                       FrequencyBar(
+                        glyph: CycleaGlyph.moon,
                         label: 'Late',
                         value: stats.lateRate,
                         color: CycleaColors.rose,
@@ -117,7 +157,18 @@ class InsightsScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Symptoms by phase', style: Theme.of(context).textTheme.titleLarge),
+                    Row(
+                      children: [
+                        CycleaIcon(
+                          CycleaGlyph.petal,
+                          filled: true,
+                          size: 18,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        const SizedBox(width: 8),
+                        Text('Symptoms by phase', style: Theme.of(context).textTheme.titleLarge),
+                      ],
+                    ),
                     const SizedBox(height: 6),
                     Text(
                       'Counts of days you logged each symptom, grouped by estimated phase. Phases use your average cycle and a ~14-day luteal assumption.',
@@ -223,6 +274,11 @@ class _PhaseSymptoms extends StatelessWidget {
               children: [
                 for (final entry in shown)
                   Chip(
+                    avatar: CycleaIcon(
+                      glyphForSymptom(entry.key),
+                      filled: true,
+                      size: 16,
+                    ),
                     label: Text('${SymptomCatalog.labelFor(entry.key)} · ${entry.value}'),
                   ),
               ],

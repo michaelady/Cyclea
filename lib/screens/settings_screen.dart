@@ -1,5 +1,7 @@
 import 'package:cyclea/domain/advice.dart';
 import 'package:cyclea/state/cycle_controller.dart';
+import 'package:cyclea/theme/cyclea_icons.dart';
+import 'package:cyclea/widgets/auth_actions.dart';
 import 'package:cyclea/widgets/disclaimer_banner.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -19,7 +21,18 @@ class SettingsScreen extends StatelessWidget {
           child: ListView(
             padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
             children: [
-              Text('Settings', style: Theme.of(context).textTheme.headlineMedium),
+              Row(
+                children: [
+                  CycleaIcon(
+                    CycleaGlyph.moon,
+                    filled: true,
+                    size: 28,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  const SizedBox(width: 10),
+                  Text('Settings', style: Theme.of(context).textTheme.headlineMedium),
+                ],
+              ),
               const SizedBox(height: 12),
               SurfaceCard(
                 child: Column(
@@ -30,7 +43,13 @@ class SettingsScreen extends StatelessWidget {
                     ListTile(
                       contentPadding: EdgeInsets.zero,
                       leading: CircleAvatar(
-                        child: Icon(controller.isGuest ? Icons.person_outline : Icons.person),
+                        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                        child: CycleaIcon(
+                          controller.isGuest ? CycleaGlyph.guest : CycleaGlyph.blossom,
+                          filled: true,
+                          size: 20,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
                       ),
                       title: Text(
                         controller.user?.displayName ??
@@ -39,32 +58,38 @@ class SettingsScreen extends StatelessWidget {
                       ),
                       subtitle: Text(controller.syncLabel),
                     ),
-                    if (!controller.firebaseReady)
+                    if (controller.isGuest) ...[
                       Text(
-                        'Google Sign-In and Firestore sync turn on after you add Firebase config (see README). Guest mode remains fully usable.',
+                        controller.firebaseReady
+                            ? 'Guest mode is fully usable. Google is optional and only syncs after you sign in.'
+                            : 'Google Sign-In is available as an option once Firebase is configured. Guest mode remains fully usable.',
                         style: Theme.of(context).textTheme.bodySmall,
-                      )
-                    else if (controller.isGuest)
-                      FilledButton.icon(
-                        onPressed: () async {
-                          try {
-                            await controller.signIn();
-                          } catch (error) {
-                            if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('Sign-in failed: $error')),
-                              );
-                            }
-                          }
-                        },
-                        icon: const Icon(Icons.login),
-                        label: const Text('Continue with Google'),
-                      )
-                    else
-                      OutlinedButton(
-                        onPressed: controller.signOut,
-                        child: const Text('Sign out'),
                       ),
+                      const SizedBox(height: 12),
+                      AuthChoiceColumn(
+                        showGuest: true,
+                        guestLabel: 'Continue as guest',
+                        onGuest: () {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('You are already using guest mode on this device.'),
+                            ),
+                          );
+                        },
+                        onGoogle: () => handleGoogleSignIn(context, controller),
+                      ),
+                    ] else ...[
+                      Text(
+                        'Signing out returns to guest on this device. Logs stay unless you delete them.',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                      const SizedBox(height: 12),
+                      OutlinedButton.icon(
+                        onPressed: controller.signOut,
+                        icon: const CycleaIcon(CycleaGlyph.leaf, size: 18),
+                        label: const Text('Sign out'),
+                      ),
+                    ],
                     if (controller.error != null) ...[
                       const SizedBox(height: 8),
                       Text(
@@ -85,9 +110,21 @@ class SettingsScreen extends StatelessWidget {
                     SegmentedButton<ThemeMode>(
                       showSelectedIcon: false,
                       segments: const [
-                        ButtonSegment(value: ThemeMode.system, label: Text('System'), icon: Icon(Icons.brightness_auto)),
-                        ButtonSegment(value: ThemeMode.light, label: Text('Light'), icon: Icon(Icons.light_mode)),
-                        ButtonSegment(value: ThemeMode.dark, label: Text('Dark'), icon: Icon(Icons.dark_mode)),
+                        ButtonSegment(
+                          value: ThemeMode.system,
+                          label: Text('System'),
+                          icon: CycleaIcon(CycleaGlyph.spark, size: 16),
+                        ),
+                        ButtonSegment(
+                          value: ThemeMode.light,
+                          label: Text('Light'),
+                          icon: CycleaIcon(CycleaGlyph.sun, size: 16),
+                        ),
+                        ButtonSegment(
+                          value: ThemeMode.dark,
+                          label: Text('Dark'),
+                          icon: CycleaIcon(CycleaGlyph.moon, size: 16),
+                        ),
                       ],
                       selected: {controller.themeMode},
                       onSelectionChanged: (value) => controller.setThemeMode(value.first),
@@ -100,7 +137,18 @@ class SettingsScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Tester tools', style: Theme.of(context).textTheme.titleLarge),
+                    Row(
+                      children: [
+                        CycleaIcon(
+                          CycleaGlyph.seed,
+                          filled: true,
+                          size: 18,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        const SizedBox(width: 8),
+                        Text('Tester tools', style: Theme.of(context).textTheme.titleLarge),
+                      ],
+                    ),
                     const SizedBox(height: 6),
                     Text(
                       'Loads about six months of realistic, slightly irregular cycles with symptoms so Insights is not empty.',
@@ -126,7 +174,18 @@ class SettingsScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Privacy', style: Theme.of(context).textTheme.titleLarge),
+                    Row(
+                      children: [
+                        CycleaIcon(
+                          CycleaGlyph.heartLeaf,
+                          filled: true,
+                          size: 18,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        const SizedBox(width: 8),
+                        Text('Privacy', style: Theme.of(context).textTheme.titleLarge),
+                      ],
+                    ),
                     const SizedBox(height: 8),
                     Text(LegalCopy.privacySummary, style: Theme.of(context).textTheme.bodyMedium),
                     const SizedBox(height: 12),

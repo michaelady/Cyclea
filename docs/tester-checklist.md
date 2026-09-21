@@ -1,10 +1,10 @@
 # Cyclea tester checklist
 
-Use guest mode first (no Firebase keys required). Seeded demo data is the fastest way to exercise Insights.
+Use guest mode first if you do not want to sign in. Seeded demo data is the fastest way to exercise Insights.
 
 ## Guest / local
 
-- [ ] First launch shows the full medical / contraception disclaimer. The app does not enter Home until **I understand — continue**.
+- [ ] First launch shows the full medical / contraception disclaimer plus **Continue as guest** and **Continue with Google**. Guest enters Home.
 - [ ] Home, Calendar, and Insights still show a short disclaimer strip after acceptance.
 - [ ] Settings repeats the full disclaimer and privacy summary.
 - [ ] With empty data, Home asks you to log a period and does not invent a confident next-period date.
@@ -21,11 +21,11 @@ Use guest mode first (no Firebase keys required). Seeded demo data is the fastes
 - [ ] Wide browser window uses a navigation rail; narrow uses a bottom bar. All four destinations work: Home, Calendar, Insights, Settings.
 - [ ] Refresh on web keeps guest logs (Hive / IndexedDB).
 
-## Google Sign-In (only after Firebase config)
+## Google Sign-In (Firebase project cyclea-db587)
 
-- [ ] Settings shows **Continue with Google** when `lib/firebase_options.dart` is configured; otherwise it explains guest-only mode.
-- [ ] Web sign-in popup works on `localhost` and on `michaelady.github.io` after authorized domains / OAuth origins are set.
-- [ ] Android sign-in works on a device/emulator with `google-services.json` and SHA-1 registered.
+- [ ] Settings shows **Continue as guest** and **Continue with Google** in guest mode.
+- [ ] Web: **Continue with Google** opens the Google account picker on `localhost` and on `https://michaelady.github.io/Cyclea/` (authorized domain is set). A failed popup shows a snackbar; guest keeps working.
+- [ ] Android: sign-in works on a device/emulator only after debug/release **SHA-1** is added in Firebase Console for `com.cyclea.app`. Until then Google Sign-In fails; guest mode still works.
 - [ ] After sign-in, a log created as guest appears in Firestore `users/{uid}/logs/{date}`.
 - [ ] Sign out returns to guest label; local logs remain until delete-all.
 - [ ] Delete-all while signed in removes Firestore documents as well as Hive.
