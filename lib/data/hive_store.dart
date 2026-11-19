@@ -65,6 +65,7 @@ class HiveSettingsStore implements SettingsStore {
   static const boxName = 'cyclea_settings';
   static const _disclaimerKey = 'disclaimerAccepted';
   static const _themeKey = 'themeMode';
+  static const _tabKey = 'tabIndex';
 
   @override
   Future<bool> disclaimerAccepted() async =>
@@ -87,5 +88,17 @@ class HiveSettingsStore implements SettingsStore {
   @override
   Future<void> setThemeMode(ThemeMode mode) async {
     await _box.put(_themeKey, mode.name);
+  }
+
+  @override
+  Future<int> tabIndex() async {
+    final raw = _box.get(_tabKey, defaultValue: 0);
+    if (raw is int && raw >= 0 && raw <= 3) return raw;
+    return 0;
+  }
+
+  @override
+  Future<void> setTabIndex(int index) async {
+    await _box.put(_tabKey, index);
   }
 }

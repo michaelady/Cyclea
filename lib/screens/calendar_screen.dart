@@ -34,6 +34,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
     final prediction = controller.prediction;
     final stats = controller.stats;
     final selectedLog = controller.logOn(_selected);
+    final futureDay = dateOnly(_selected).isAfter(dateOnly(DateTime.now()));
     final scheme = Theme.of(context).colorScheme;
 
     return SafeArea(
@@ -54,7 +55,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   ),
                   const SizedBox(width: 10),
                   Expanded(
-                    child: Text('Calendar', style: Theme.of(context).textTheme.headlineMedium),
+                    child: Text(
+                      'Calendar',
+                      style: Theme.of(context).textTheme.headlineMedium,
+                    ),
                   ),
                   FilledButton.tonal(
                     onPressed: () => showPeriodRangeDialog(context),
@@ -75,7 +79,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   selectedDayPredicate: (day) => isSameDay(day, _selected),
                   calendarFormat: CalendarFormat.month,
                   startingDayOfWeek: StartingDayOfWeek.monday,
-                  headerStyle: const HeaderStyle(formatButtonVisible: false, titleCentered: true),
+                  pageAnimationEnabled: false,
+                  headerStyle: const HeaderStyle(
+                    formatButtonVisible: false,
+                    titleCentered: true,
+                  ),
                   calendarStyle: CalendarStyle(
                     todayDecoration: BoxDecoration(
                       color: scheme.primary.withValues(alpha: 0.18),
@@ -95,10 +103,14 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   },
                   onPageChanged: (focused) => _focused = focused,
                   calendarBuilders: CalendarBuilders(
-                    defaultBuilder: (context, day, focused) => _dayCell(day, selected: false),
-                    todayBuilder: (context, day, focused) => _dayCell(day, selected: false, today: true),
-                    selectedBuilder: (context, day, focused) => _dayCell(day, selected: true),
-                    markerBuilder: (context, day, events) => const SizedBox.shrink(),
+                    defaultBuilder: (context, day, focused) =>
+                        _dayCell(day, selected: false),
+                    todayBuilder: (context, day, focused) =>
+                        _dayCell(day, selected: false, today: true),
+                    selectedBuilder: (context, day, focused) =>
+                        _dayCell(day, selected: true),
+                    markerBuilder: (context, day, events) =>
+                        const SizedBox.shrink(),
                   ),
                 ),
               ),
@@ -125,7 +137,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
                       ],
                     ),
                     const SizedBox(height: 6),
-                    Text(_statusLine(controller, _selected), style: Theme.of(context).textTheme.bodyMedium),
+                    Text(
+                      _statusLine(controller, _selected),
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
                     if (selectedLog?.symptomIds.isNotEmpty == true) ...[
                       const SizedBox(height: 8),
                       Text(
@@ -138,28 +153,44 @@ class _CalendarScreenState extends State<CalendarScreen> {
                       Text(selectedLog!.notes),
                     ],
                     const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        FilledButton(
-                          onPressed: () => showLogEditor(context, date: _selected),
-                          child: Text(selectedLog == null ? 'Add log' : 'Edit log'),
-                        ),
-                        if (selectedLog != null) ...[
-                          const SizedBox(width: 8),
-                          TextButton(
-                            onPressed: () => controller.deleteLog(_selected),
-                            child: const Text('Delete'),
+                    if (futureDay && selectedLog == null)
+                      Text(
+                        'You can view estimates for later days. Logs can only be saved for today or earlier.',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      )
+                    else
+                      Row(
+                        children: [
+                          FilledButton(
+                            onPressed: () =>
+                                showLogEditor(context, date: _selected),
+                            child: Text(
+                              selectedLog == null ? 'Add log' : 'Edit log',
+                            ),
                           ),
+                          if (selectedLog != null) ...[
+                            const SizedBox(width: 8),
+                            TextButton(
+                              onPressed: () async {
+                                final confirmed = await confirmDeleteDay(
+                                  context,
+                                );
+                                if (!confirmed || !context.mounted) return;
+                                await controller.deleteLog(_selected);
+                              },
+                              child: const Text('Delete'),
+                            ),
+                          ],
                         ],
-                      ],
-                    ),
+                      ),
                     if (stats.lastPeriodStart == null) ...[
                       const SizedBox(height: 8),
                       Text(
                         'Predicted days appear after you log at least one period start. Uncertainty stays wide until a few cycles exist.',
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
-                    ] else if (prediction.irregular || prediction.usedDefaultCycle) ...[
+                    ] else if (prediction.irregular ||
+                        prediction.usedDefaultCycle) ...[
                       const SizedBox(height: 8),
                       Text(
                         'Shaded prediction days are uncertain (${prediction.confidence.label}). Irregular cycles are OK — the window is just wider.',
@@ -199,9 +230,13 @@ class _CalendarScreenState extends State<CalendarScreen> {
     return Container(
       margin: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: selected && fill == null ? Theme.of(context).colorScheme.primary : fill,
+        color: selected && fill == null
+            ? Theme.of(context).colorScheme.primary
+            : fill,
         shape: BoxShape.circle,
-        border: border == null ? null : Border.all(color: border, width: today || selected ? 2 : 1),
+        border: border == null
+            ? null
+            : Border.all(color: border, width: today || selected ? 2 : 1),
       ),
       alignment: Alignment.center,
       child: Text(
@@ -216,7 +251,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
   String _statusLine(CycleController controller, DateTime day) {
     final log = controller.logOn(day);
-    if (log != null && log.isPeriod) return 'Logged period · ${log.flow.label} flow';
+    if (log != null && log.isPeriod) {
+      return 'Logged period · ${log.flow.label} flow';
+    }
     if (controller.prediction.isFertile(day)) {
       return 'Inside the estimated fertile window (not contraception).';
     }

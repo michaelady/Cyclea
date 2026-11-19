@@ -1,3 +1,5 @@
+import 'package:cyclea/cyclea_flags.dart';
+import 'package:cyclea/cyclea_version.dart';
 import 'package:cyclea/domain/advice.dart';
 import 'package:cyclea/state/cycle_controller.dart';
 import 'package:cyclea/theme/cyclea_icons.dart';
@@ -6,6 +8,22 @@ import 'package:cyclea/widgets/disclaimer_banner.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+/// Privacy page for [base], without an empty `?` or `#`.
+Uri privacyPageUriFrom(Uri base, {required bool onWeb}) {
+  if (!onWeb) {
+    return Uri.parse('https://michaelady.github.io/Cyclea/privacy.html');
+  }
+  final path = base.path.contains('/Cyclea')
+      ? '/Cyclea/privacy.html'
+      : '/privacy.html';
+  return Uri(
+    scheme: base.scheme.isEmpty ? 'https' : base.scheme,
+    host: base.host.isEmpty ? 'michaelady.github.io' : base.host,
+    port: base.hasPort ? base.port : null,
+    path: path,
+  );
+}
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -30,7 +48,10 @@ class SettingsScreen extends StatelessWidget {
                     color: Theme.of(context).colorScheme.primary,
                   ),
                   const SizedBox(width: 10),
-                  Text('Settings', style: Theme.of(context).textTheme.headlineMedium),
+                  Text(
+                    'Settings',
+                    style: Theme.of(context).textTheme.headlineMedium,
+                  ),
                 ],
               ),
               const SizedBox(height: 12),
@@ -38,14 +59,21 @@ class SettingsScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Account', style: Theme.of(context).textTheme.titleLarge),
+                    Text(
+                      'Account',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
                     const SizedBox(height: 8),
                     ListTile(
                       contentPadding: EdgeInsets.zero,
                       leading: CircleAvatar(
-                        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                        backgroundColor: Theme.of(context)
+                            .colorScheme
+                            .primaryContainer,
                         child: CycleaIcon(
-                          controller.isGuest ? CycleaGlyph.guest : CycleaGlyph.blossom,
+                          controller.isGuest
+                              ? CycleaGlyph.guest
+                              : CycleaGlyph.blossom,
                           filled: true,
                           size: 20,
                           color: Theme.of(context).colorScheme.primary,
@@ -67,15 +95,8 @@ class SettingsScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 12),
                       AuthChoiceColumn(
-                        showGuest: true,
-                        guestLabel: 'Continue as guest',
-                        onGuest: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('You are already using guest mode on this device.'),
-                            ),
-                          );
-                        },
+                        showGuest: false,
+                        onGuest: () {},
                         onGoogle: () => handleGoogleSignIn(context, controller),
                       ),
                     ] else ...[
@@ -94,7 +115,9 @@ class SettingsScreen extends StatelessWidget {
                       const SizedBox(height: 8),
                       Text(
                         controller.error!,
-                        style: TextStyle(color: Theme.of(context).colorScheme.error),
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.error,
+                        ),
                       ),
                     ],
                   ],
@@ -105,10 +128,17 @@ class SettingsScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Appearance', style: Theme.of(context).textTheme.titleLarge),
+                    Text(
+                      'Appearance',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
                     const SizedBox(height: 8),
                     SegmentedButton<ThemeMode>(
                       showSelectedIcon: false,
+                      style: const ButtonStyle(
+                        minimumSize: WidgetStatePropertyAll(Size(48, 44)),
+                        tapTargetSize: MaterialTapTargetSize.padded,
+                      ),
                       segments: const [
                         ButtonSegment(
                           value: ThemeMode.system,
@@ -127,48 +157,58 @@ class SettingsScreen extends StatelessWidget {
                         ),
                       ],
                       selected: {controller.themeMode},
-                      onSelectionChanged: (value) => controller.setThemeMode(value.first),
+                      onSelectionChanged: (value) =>
+                          controller.setThemeMode(value.first),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 12),
-              SurfaceCard(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        CycleaIcon(
-                          CycleaGlyph.seed,
-                          filled: true,
-                          size: 18,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                        const SizedBox(width: 8),
-                        Text('Tester tools', style: Theme.of(context).textTheme.titleLarge),
-                      ],
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      'Loads about six months of realistic, slightly irregular cycles with symptoms so Insights is not empty.',
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                    const SizedBox(height: 12),
-                    FilledButton.tonal(
-                      onPressed: () async {
-                        await controller.seedDemoData();
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Demo cycles added. Check Home and Insights.')),
-                          );
-                        }
-                      },
-                      child: const Text('Seed demo data'),
-                    ),
-                  ],
+              if (CycleaFlags.testerTools) ...[
+                const SizedBox(height: 12),
+                SurfaceCard(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          CycleaIcon(
+                            CycleaGlyph.seed,
+                            filled: true,
+                            size: 18,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Tester tools',
+                            style: Theme.of(context).textTheme.titleLarge,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        'Loads about six months of realistic, slightly irregular cycles with symptoms so Insights is not empty. Replaces logs already on this device.',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                      const SizedBox(height: 12),
+                      FilledButton.tonal(
+                        onPressed: () async {
+                          await controller.seedDemoData();
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                  'Demo cycles added. Check Home and Insights.',
+                                ),
+                              ),
+                            );
+                          }
+                        },
+                        child: const Text('Seed demo data'),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
+              ],
               const SizedBox(height: 12),
               SurfaceCard(
                 child: Column(
@@ -183,11 +223,17 @@ class SettingsScreen extends StatelessWidget {
                           color: Theme.of(context).colorScheme.primary,
                         ),
                         const SizedBox(width: 8),
-                        Text('Privacy', style: Theme.of(context).textTheme.titleLarge),
+                        Text(
+                          'Privacy',
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
                       ],
                     ),
                     const SizedBox(height: 8),
-                    Text(LegalCopy.privacySummary, style: Theme.of(context).textTheme.bodyMedium),
+                    Text(
+                      LegalCopy.privacySummary,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
                     const SizedBox(height: 12),
                     OutlinedButton(
                       onPressed: () => _openPrivacy(context),
@@ -195,6 +241,10 @@ class SettingsScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     TextButton(
+                      style: const ButtonStyle(
+                        minimumSize: WidgetStatePropertyAll(Size(48, 44)),
+                        tapTargetSize: MaterialTapTargetSize.padded,
+                      ),
                       onPressed: () => _confirmDelete(context, controller),
                       child: const Text('Delete all Cyclea data'),
                     ),
@@ -206,15 +256,21 @@ class SettingsScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Disclaimer', style: Theme.of(context).textTheme.titleLarge),
+                    Text(
+                      'Disclaimer',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
                     const SizedBox(height: 8),
-                    Text(LegalCopy.fullDisclaimer, style: Theme.of(context).textTheme.bodyMedium),
+                    Text(
+                      LegalCopy.fullDisclaimer,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
                   ],
                 ),
               ),
               const SizedBox(height: 16),
               Text(
-                'Cyclea 1.0.0 · com.cyclea.app · no ads · no selling health data',
+                '${CycleaVersion.label} · com.cyclea.app · no ads · no selling health data',
                 style: Theme.of(context).textTheme.bodySmall,
               ),
             ],
@@ -234,18 +290,12 @@ class SettingsScreen extends StatelessWidget {
     }
   }
 
-  static Uri privacyPageUri() {
-    if (!kIsWeb) {
-      return Uri.parse('https://michaelady.github.io/Cyclea/privacy.html');
-    }
-    final base = Uri.base;
-    if (base.path.contains('/Cyclea')) {
-      return base.replace(path: '/Cyclea/privacy.html', query: '', fragment: '');
-    }
-    return base.replace(path: '/privacy.html', query: '', fragment: '');
-  }
+  static Uri privacyPageUri() => privacyPageUriFrom(Uri.base, onWeb: kIsWeb);
 
-  Future<void> _confirmDelete(BuildContext context, CycleController controller) async {
+  Future<void> _confirmDelete(
+    BuildContext context,
+    CycleController controller,
+  ) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -254,7 +304,10 @@ class SettingsScreen extends StatelessWidget {
           'This removes every log from this device. If you are signed in, it also deletes your Cyclea documents in Cloud Firestore. This cannot be undone.',
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
           FilledButton(
             onPressed: () => Navigator.pop(context, true),
             child: const Text('Delete everything'),
@@ -265,9 +318,9 @@ class SettingsScreen extends StatelessWidget {
     if (confirmed != true) return;
     await controller.deleteAllData();
     if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('All Cyclea logs deleted.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('All Cyclea logs deleted.')));
     }
   }
 }

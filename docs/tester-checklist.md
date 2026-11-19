@@ -12,7 +12,7 @@ Use guest mode first if you do not want to sign in. Seeded demo data is the fast
 - [ ] Tapping a day opens the editor. Period toggle, flow chips, ~24 symptoms, notes, Save, Delete day.
 - [ ] After two period starts, Home shows cycle day, next period, fertile window, and a confidence / uncertainty caption.
 - [ ] Irregular spacing (for example 21 then 35 days) widens uncertainty and can flag Insights as more variable.
-- [ ] **Settings → Seed demo data** fills ~six months. Home ring, Calendar colors, and Insights averages populate.
+- [ ] Production Settings does not show **Tester tools** or **Seed demo data**. A build with `--dart-define=CYCLEA_TESTER_TOOLS=true` can seed ~six months. Home ring, Calendar colors, and Insights averages populate, with no future logs and no gaps inside a period.
 - [ ] Calendar legend: rose = logged period, sage = fertile estimate, sand = predicted period (plus a lighter uncertainty band).
 - [ ] Insights: average cycle, variability, period length, range, early / on-time / late bars, symptoms by phase, advice cards.
 - [ ] Advice never claims diagnosis or contraception. At least one card says estimates are not a method to avoid or achieve pregnancy.
@@ -23,7 +23,7 @@ Use guest mode first if you do not want to sign in. Seeded demo data is the fast
 
 ## Google Sign-In (Firebase project cyclea-db587)
 
-- [ ] Settings shows **Continue as guest** and **Continue with Google** in guest mode.
+- [ ] Settings shows **Continue with Google** in guest mode and does not show **Continue as guest** again. Welcome still offers both.
 - [ ] Web: **Continue with Google** opens the Google account picker on `localhost` and on `https://michaelady.github.io/Cyclea/` (authorized domain is set). A failed popup shows a snackbar; guest keeps working.
 - [ ] Android: sign-in works on a device/emulator only after debug/release **SHA-1** is added in Firebase Console for `com.cyclea.app`. Until then Google Sign-In fails; guest mode still works.
 - [ ] After sign-in, a log created as guest appears in Firestore `users/{uid}/logs/{date}`.

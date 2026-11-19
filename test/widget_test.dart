@@ -8,41 +8,46 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('welcome shows guest and google options then home in guest mode', (tester) async {
-    final controller = CycleController(
-      localLogs: MemoryLogStore(),
-      settings: MemorySettingsStore(),
-      auth: AuthService.disabled(),
-      now: () => DateTime(2026, 9, 14),
-    );
-    await controller.bootstrap();
-    await tester.pumpWidget(CycleaApp(controller: controller));
-    await tester.pumpAndSettle();
+  testWidgets(
+    'welcome shows guest and google options then home in guest mode',
+    (tester) async {
+      final controller = CycleController(
+        localLogs: MemoryLogStore(),
+        settings: MemorySettingsStore(),
+        auth: AuthService.disabled(),
+        now: () => DateTime(2026, 9, 14),
+      );
+      await controller.bootstrap();
+      await tester.pumpWidget(CycleaApp(controller: controller));
+      await tester.pumpAndSettle();
 
-    expect(find.text('Cyclea'), findsWidgets);
-    expect(find.textContaining('not a contraceptive'), findsWidgets);
-    expect(find.text('Continue as guest'), findsOneWidget);
-    expect(find.text('Continue with Google'), findsOneWidget);
+      expect(find.text('Cyclea'), findsWidgets);
+      expect(find.textContaining('not a contraceptive'), findsWidgets);
+      expect(find.text('Continue as guest'), findsOneWidget);
+      expect(find.text('Continue with Google'), findsOneWidget);
 
-    await tester.tap(find.text('Continue with Google'));
-    await tester.pumpAndSettle();
-    expect(find.text(AuthCopy.firebaseNeededTitle), findsOneWidget);
-    await tester.tap(find.text('Keep using guest'));
-    await tester.pumpAndSettle();
+      await tester.tap(find.text('Continue with Google'));
+      await tester.pumpAndSettle();
+      expect(find.text(AuthCopy.firebaseNeededTitle), findsOneWidget);
+      await tester.tap(find.text('Keep using guest'));
+      await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Continue as guest'));
-    await tester.pumpAndSettle();
+      await tester.tap(find.text('Continue as guest'));
+      await tester.pumpAndSettle();
 
-    expect(find.text('Cyclea'), findsWidgets);
-    expect(find.textContaining('not medical advice'), findsWidgets);
-    expect(find.text('Guest'), findsOneWidget);
-    expect(find.text('Home'), findsOneWidget);
-    expect(find.text('Calendar'), findsOneWidget);
-    expect(find.text('Insights'), findsOneWidget);
-    expect(find.text('Settings'), findsOneWidget);
-  });
+      expect(find.text('Cyclea'), findsWidgets);
+      expect(find.textContaining('not medical advice'), findsWidgets);
+      expect(find.text('Guest'), findsOneWidget);
+      expect(find.text('Home'), findsOneWidget);
+      expect(find.text('Calendar'), findsOneWidget);
+      expect(find.text('Insights'), findsOneWidget);
+      expect(find.text('Settings'), findsOneWidget);
+    },
+  );
 
-  testWidgets('settings keeps google as an optional path beside guest', (tester) async {
+  testWidgets('settings keeps google as an optional path beside guest', (
+    tester,
+  ) async {
     final controller = CycleController(
       localLogs: MemoryLogStore(),
       settings: MemorySettingsStore(disclaimerAccepted: true),
@@ -56,14 +61,21 @@ void main() {
     await tester.tap(find.text('Settings'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Continue as guest'), findsOneWidget);
+    expect(find.text('Continue as guest'), findsNothing);
     expect(find.text('Continue with Google'), findsOneWidget);
-    expect(find.textContaining('Guest mode remains fully usable'), findsOneWidget);
+    expect(find.text('Guest on this device'), findsOneWidget);
+    expect(
+      find.textContaining('Guest mode remains fully usable'),
+      findsOneWidget,
+    );
 
     await tester.tap(find.text('Continue with Google'));
     await tester.pumpAndSettle();
     expect(find.text(AuthCopy.firebaseNeededTitle), findsOneWidget);
-    expect(find.textContaining('Guest mode stays fully usable'), findsOneWidget);
+    expect(
+      find.textContaining('Guest mode stays fully usable'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('seeded demo data shows insights averages', (tester) async {
