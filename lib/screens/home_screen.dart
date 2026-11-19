@@ -53,13 +53,22 @@ class HomeScreen extends StatelessWidget {
                       ],
                     ),
                   ),
-                  Chip(
-                    label: Text(controller.isGuest ? 'Guest' : 'Synced'),
-                    avatar: CycleaIcon(
-                      controller.isGuest ? CycleaGlyph.guest : CycleaGlyph.cloudLeaf,
-                      filled: true,
-                      size: 16,
-                      color: controller.isGuest ? CycleaColors.lilac : CycleaColors.sage,
+                  SizedBox(
+                    height: 44,
+                    child: Chip(
+                      label: Text(controller.isGuest ? 'Guest' : 'Synced'),
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      labelPadding: const EdgeInsets.symmetric(horizontal: 6),
+                      avatar: CycleaIcon(
+                        controller.isGuest
+                            ? CycleaGlyph.guest
+                            : CycleaGlyph.cloudLeaf,
+                        filled: true,
+                        size: 16,
+                        color: controller.isGuest
+                            ? CycleaColors.lilac
+                            : CycleaColors.sage,
+                      ),
                     ),
                   ),
                 ],
@@ -71,6 +80,10 @@ class HomeScreen extends StatelessWidget {
                 child: LayoutBuilder(
                   builder: (context, constraints) {
                     final stack = constraints.maxWidth < 420;
+                    final dark =
+                        Theme.of(context).brightness == Brightness.dark;
+                    final onHero = dark ? CycleaColors.darkHeroText : null;
+                    final mutedHero = dark ? CycleaColors.darkHeroMuted : null;
                     final ring = CycleRing(
                       cycleDay: prediction.cycleDay,
                       cycleLength: prediction.expectedCycleLength,
@@ -85,24 +98,22 @@ class HomeScreen extends StatelessWidget {
                           prediction.cycleDay == null
                               ? 'Log a period start to open the bloom and see cycle day estimates.'
                               : 'Day ${prediction.cycleDay} of a typical ${prediction.expectedCycleLength}-day cycle for you.',
-                          style: Theme.of(context).textTheme.bodyMedium,
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(color: onHero),
                         ),
                         if (stats.irregular) ...[
                           const SizedBox(height: 8),
                           Text(
                             'Your recent lengths vary, so this placement is approximate.',
-                            style: Theme.of(context).textTheme.bodySmall,
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(color: mutedHero),
                           ),
                         ],
                       ],
                     );
                     if (stack) {
                       return Column(
-                        children: [
-                          ring,
-                          const SizedBox(height: 12),
-                          details,
-                        ],
+                        children: [ring, const SizedBox(height: 12), details],
                       );
                     }
                     return Row(
@@ -137,7 +148,9 @@ class HomeScreen extends StatelessWidget {
                         glyph: CycleaGlyph.blossom,
                         title: 'Fertile window',
                         value: _fertileLabel(prediction),
-                        caption: 'Calendar estimate only',
+                        caption: prediction.showsEstimate
+                            ? '${prediction.confidence.label} · calendar estimate only'
+                            : prediction.confidence.label,
                       ),
                     ),
                   ),
@@ -162,12 +175,20 @@ class HomeScreen extends StatelessWidget {
                     children: [
                       Row(
                         children: [
-                          const CycleaIcon(CycleaGlyph.sun, filled: true, size: 18),
+                          const CycleaIcon(
+                            CycleaGlyph.sun,
+                            filled: true,
+                            size: 18,
+                          ),
                           const SizedBox(width: 8),
-                          Text('Today', style: Theme.of(context).textTheme.titleLarge),
+                          Text(
+                            'Today',
+                            style: Theme.of(context).textTheme.titleLarge,
+                          ),
                           const Spacer(),
                           TextButton(
-                            onPressed: () => showLogEditor(context, date: today),
+                            onPressed: () =>
+                                showLogEditor(context, date: today),
                             child: const Text('Edit today'),
                           ),
                         ],
@@ -193,7 +214,10 @@ class HomeScreen extends StatelessWidget {
                       ],
                       if (todayLog.notes.isNotEmpty) ...[
                         const SizedBox(height: 8),
-                        Text(todayLog.notes, style: Theme.of(context).textTheme.bodySmall),
+                        Text(
+                          todayLog.notes,
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
                       ],
                     ],
                   ),
@@ -227,7 +251,9 @@ class HomeScreen extends StatelessWidget {
   }
 
   static String _fertileLabel(CyclePrediction prediction) {
-    if (prediction.fertileStart == null || prediction.fertileEnd == null) {
+    if (!prediction.showsEstimate ||
+        prediction.fertileStart == null ||
+        prediction.fertileEnd == null) {
       return 'Needs more logs';
     }
     return '${DateFormat.MMMd().format(prediction.fertileStart!)} – ${DateFormat.MMMd().format(prediction.fertileEnd!)}';
@@ -254,7 +280,12 @@ class _ForecastBlock extends StatelessWidget {
       children: [
         Row(
           children: [
-            CycleaIcon(glyph, filled: true, size: 16, color: Theme.of(context).colorScheme.primary),
+            CycleaIcon(
+              glyph,
+              filled: true,
+              size: 16,
+              color: Theme.of(context).colorScheme.primary,
+            ),
             const SizedBox(width: 6),
             Text(title, style: Theme.of(context).textTheme.bodySmall),
           ],

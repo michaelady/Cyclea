@@ -4,17 +4,53 @@ import 'package:cyclea/domain/flow_level.dart';
 import 'package:cyclea/domain/symptom.dart';
 import 'package:cyclea/state/cycle_controller.dart';
 import 'package:cyclea/theme/cyclea_icons.dart';
+import 'package:cyclea/widgets/period_range_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+Future<bool> confirmDeleteDay(BuildContext context) async {
+  final confirmed = await showDialog<bool>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text('Delete this day?'),
+      content: const Text(
+        'This removes the period mark, flow, symptoms, and notes for this date. Other days in the period stay logged.',
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context, false),
+          child: const Text('Cancel'),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.pop(context, true),
+          child: const Text('Delete'),
+        ),
+      ],
+    ),
+  );
+  return confirmed == true;
+}
+
 Future<void> showLogEditor(BuildContext context, {required DateTime date}) {
-  final existing = AppScope.of(context).logOn(date);
+  final day = dateOnly(date);
+  final existing = AppScope.of(context).logOn(day);
+  if (day.isAfter(dateOnly(DateTime.now())) && existing == null) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('You can log today or earlier days.')),
+    );
+    return Future.value();
+  }
   return showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
     showDragHandle: true,
-    builder: (context) => LogEditorSheet(date: dateOnly(date), existing: existing),
+    enableDrag: false,
+    sheetAnimationStyle: const AnimationStyle(
+      duration: Duration.zero,
+      reverseDuration: Duration(milliseconds: 80),
+    ),
+    builder: (context) => LogEditorSheet(date: day, existing: existing),
   );
 }
 
@@ -51,12 +87,20 @@ class _LogEditorSheetState extends State<LogEditorSheet> {
   }
 
   Future<void> _save() async {
+    if (dateOnly(widget.date).isAfter(dateOnly(DateTime.now()))) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('You can log today or earlier days.')),
+      );
+      return;
+    }
     final controller = AppScope.of(context);
     await controller.saveLog(
       DailyLog(
         date: widget.date,
         isPeriod: _period,
-        flow: _period ? (_flow == FlowLevel.none ? FlowLevel.medium : _flow) : FlowLevel.none,
+        flow: _period
+            ? (_flow == FlowLevel.none ? FlowLevel.medium : _flow)
+            : FlowLevel.none,
         symptomIds: _symptoms,
         notes: _notes.text.trim(),
         updatedAt: DateTime.now().toUtc(),
@@ -66,6 +110,8 @@ class _LogEditorSheetState extends State<LogEditorSheet> {
   }
 
   Future<void> _delete() async {
+    final confirmed = await confirmDeleteDay(context);
+    if (!confirmed || !mounted) return;
     await AppScope.of(context).deleteLog(widget.date);
     if (mounted) Navigator.of(context).pop();
   }
@@ -95,7 +141,11 @@ class _LogEditorSheetState extends State<LogEditorSheet> {
               contentPadding: EdgeInsets.zero,
               title: const Text('Period day'),
               subtitle: const Text('Start, middle, or end of bleeding'),
-              secondary: const CycleaIcon(CycleaGlyph.drop, filled: true, size: 22),
+              secondary: const CycleaIcon(
+                CycleaGlyph.drop,
+                filled: true,
+                size: 22,
+              ),
               value: _period,
               onChanged: (value) => setState(() {
                 _period = value;
@@ -110,7 +160,9 @@ class _LogEditorSheetState extends State<LogEditorSheet> {
               Wrap(
                 spacing: 8,
                 children: [
-                  for (final level in FlowLevel.values.where((item) => item != FlowLevel.none))
+                  for (final level in FlowLevel.values.where(
+                    (item) => item != FlowLevel.none,
+                  ))
                     ChoiceChip(
                       avatar: CycleaIcon(
                         CycleaGlyph.drop,
@@ -200,13 +252,20 @@ class _LogEditorSheetState extends State<LogEditorSheet> {
 
 Future<void> showPeriodRangeDialog(BuildContext context) async {
   final controller = AppScope.of(context);
-  final now = DateTime.now();
-  final range = await showDateRangePicker(
+  final today = dateOnly(DateTime.now());
+  final range = await showGeneralDialog<DateTimeRange>(
     context: context,
-    firstDate: DateTime(now.year - 2),
-    lastDate: DateTime(now.year + 1),
-    initialDateRange: DateTimeRange(start: now, end: now),
-    helpText: 'Period start and end',
+    barrierDismissible: true,
+    barrierLabel: 'Dismiss period range',
+    transitionDuration: Duration.zero,
+    pageBuilder: (context, animation, secondaryAnimation) {
+      return Center(
+        child: PeriodRangeDialog(
+          today: today,
+          firstDate: DateTime(today.year - 2, today.month, today.day),
+        ),
+      );
+    },
   );
   if (range == null) return;
   await controller.markPeriodRange(range.start, range.end);

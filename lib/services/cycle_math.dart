@@ -14,24 +14,30 @@ class CycleMath {
   static const int onTimeWindowDays = 2;
   static const int minPlausibleCycle = 10;
   static const int maxPlausibleCycle = 90;
+
+  /// Missing days inside one period that still belong to the same cycle.
+  /// Deleting a middle day leaves a 1-day hole and must not become a new start.
+  static const int maxInteriorGapDays = 2;
   static const int defaultPeriodLength = 5;
   static const double irregularStdDevThreshold = 8;
   static const int irregularRangeThreshold = 10;
 
   static List<PeriodSpan> periodSpans(Iterable<DailyLog> logs) {
-    final days = logs
-        .where((log) => log.isPeriod || log.flow.isBleeding)
-        .map((log) => dateOnly(log.date))
-        .toSet()
-        .toList()
-      ..sort();
+    final days =
+        logs
+            .where((log) => log.isPeriod || log.flow.isBleeding)
+            .map((log) => dateOnly(log.date))
+            .toSet()
+            .toList()
+          ..sort();
     if (days.isEmpty) return const [];
 
     final spans = <PeriodSpan>[];
     var runStart = days.first;
     var runEnd = days.first;
     for (var i = 1; i < days.length; i++) {
-      if (daysBetween(runEnd, days[i]) == 1) {
+      final missing = daysBetween(runEnd, days[i]) - 1;
+      if (missing <= maxInteriorGapDays) {
         runEnd = days[i];
       } else {
         spans.add(PeriodSpan(start: runStart, end: runEnd));
@@ -124,7 +130,9 @@ class CycleMath {
     final fertileStart = ovulation.subtract(
       const Duration(days: fertileBeforeOvulation),
     );
-    final fertileEnd = ovulation.add(const Duration(days: fertileAfterOvulation));
+    final fertileEnd = ovulation.add(
+      const Duration(days: fertileAfterOvulation),
+    );
     if (!d.isBefore(fertileStart) && !d.isAfter(fertileEnd)) {
       return CyclePhase.ovulatory;
     }
@@ -132,7 +140,10 @@ class CycleMath {
     return CyclePhase.luteal;
   }
 
-  static DateTime? _cycleStartOnOrBefore(DateTime date, List<PeriodSpan> spans) {
+  static DateTime? _cycleStartOnOrBefore(
+    DateTime date,
+    List<PeriodSpan> spans,
+  ) {
     DateTime? best;
     for (final span in spans) {
       if (!span.start.isAfter(date)) {
@@ -171,12 +182,10 @@ class CycleMath {
     return counts;
   }
 
-  static CycleStats statsFor(
-    Iterable<DailyLog> logs, {
-    DateTime? now,
-  }) {
-    now ?? DateTime.now();
-    final spans = periodSpans(logs);
+  static CycleStats statsFor(Iterable<DailyLog> logs, {DateTime? now}) {
+    final today = dateOnly(now ?? DateTime.now());
+    final usable = logs.where((log) => !dateOnly(log.date).isAfter(today));
+    final spans = periodSpans(usable);
     final lengths = cycleLengthsFromSpans(spans);
     final avg = mean(lengths);
     final sd = sampleStdDev(lengths);
@@ -201,7 +210,7 @@ class CycleMath {
       lastPeriodStart: lastSpan?.start,
       lastPeriodLength: lastSpan?.lengthDays,
       symptomsByPhase: symptomsByPhase(
-        logs: logs,
+        logs: usable,
         spans: spans,
         cycleLength: cycleLength,
       ),

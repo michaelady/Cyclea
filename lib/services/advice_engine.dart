@@ -1,6 +1,7 @@
 import 'package:cyclea/domain/advice.dart';
 import 'package:cyclea/domain/cycle_phase.dart';
 import 'package:cyclea/domain/cycle_stats.dart';
+import 'package:cyclea/domain/dates.dart';
 import 'package:cyclea/domain/prediction.dart';
 import 'package:cyclea/domain/symptom.dart';
 
@@ -8,19 +9,20 @@ class AdviceEngine {
   static List<AdviceCard> cardsFor({
     required CycleStats stats,
     required CyclePrediction prediction,
+    DateTime? today,
   }) {
+    final phase = _phaseForCard(prediction, today);
     final cards = <AdviceCard>[
       const AdviceCard(
         id: 'not-contraception',
         title: 'Estimates, not contraception',
-        body:
-            'Next-period and fertile-window dates are calendar guesses from your logs. They are not a method to avoid or achieve pregnancy, and they are not a lab or ultrasound result.',
+        body: 'Next-period and fertile-window dates are calendar guesses from your logs. They are not a method to avoid or achieve pregnancy, and they are not a lab or ultrasound result.',
         tag: 'Important',
       ),
       AdviceCard(
         id: 'phase',
-        title: _phaseTitle(prediction.phaseToday),
-        body: prediction.phaseToday.blurb,
+        title: _phaseTitle(phase),
+        body: phase.blurb,
         tag: 'This phase',
       ),
     ];
@@ -43,8 +45,7 @@ class AdviceEngine {
         const AdviceCard(
           id: 'log-more',
           title: 'Predictions improve with a few cycles',
-          body:
-              'Log period start and end as they happen. After two or more complete cycles, Cyclea can show your personal average, variability, and early/late rhythm.',
+          body: 'Log period start and end as they happen. After two or more complete cycles, Cyclea can show your personal average, variability, and early/late rhythm.',
           tag: 'Getting started',
         ),
       );
@@ -55,8 +56,7 @@ class AdviceEngine {
         const AdviceCard(
           id: 'irregular',
           title: 'Irregular can still be trackable',
-          body:
-              'Your recent cycle lengths spread out more than average. That is common and has many non-serious causes, but only a clinician can interpret it for you. Cyclea widens the uncertainty band instead of pretending you have a clockwork 28-day cycle.',
+          body: 'Your recent cycle lengths spread out more than average. That is common and has many non-serious causes, but only a clinician can interpret it for you. Cyclea widens the uncertainty band instead of pretending you have a clockwork 28-day cycle.',
           tag: 'Your pattern',
         ),
       );
@@ -74,8 +74,12 @@ class AdviceEngine {
       );
     }
 
-    final lutealTop = _topSymptom(stats.symptomsByPhase[CyclePhase.luteal] ?? {});
-    final periodTop = _topSymptom(stats.symptomsByPhase[CyclePhase.menstrual] ?? {});
+    final lutealTop = _topSymptom(
+      stats.symptomsByPhase[CyclePhase.luteal] ?? {},
+    );
+    final periodTop = _topSymptom(
+      stats.symptomsByPhase[CyclePhase.menstrual] ?? {},
+    );
     if (lutealTop != null) {
       cards.add(
         AdviceCard(
@@ -105,8 +109,7 @@ class AdviceEngine {
       const AdviceCard(
         id: 'iron',
         title: 'Period days and iron (education)',
-        body:
-            'Menstrual blood loss can contribute to low iron for some people. Foods such as beans, lentils, leafy greens, and fortified grains are commonly discussed in general nutrition education — not a diet prescription from Cyclea.',
+        body: 'Menstrual blood loss can contribute to low iron for some people. Foods such as beans, lentils, leafy greens, and fortified grains are commonly discussed in general nutrition education — not a diet prescription from Cyclea.',
         tag: 'Education',
       ),
     );
@@ -114,8 +117,7 @@ class AdviceEngine {
       const AdviceCard(
         id: 'luteal-science',
         title: 'Why the fertile window is ~mid-cycle',
-        body:
-            'The luteal phase (after ovulation) is often closer to 12–16 days than the first half of the cycle. Cyclea therefore estimates ovulation by counting backward about 14 days from your typical next period — then draws a multi-day window around that guess.',
+        body: 'The luteal phase (after ovulation) is often closer to 12–16 days than the first half of the cycle. Cyclea therefore estimates ovulation by counting backward about 14 days from your typical next period — then draws a multi-day window around that guess.',
         tag: 'Education',
       ),
     );
@@ -123,13 +125,23 @@ class AdviceEngine {
       const AdviceCard(
         id: 'clinician',
         title: 'When to talk to a clinician',
-        body:
-            'Seek in-person care for soaking through protection hourly, bleeding after menopause, severe pain, pregnancy concern, or a sudden lasting change in your cycle. Cyclea cannot triage emergencies.',
+        body: 'Seek in-person care for soaking through protection hourly, bleeding after menopause, severe pain, pregnancy concern, or a sudden lasting change in your cycle. Cyclea cannot triage emergencies.',
         tag: 'Education',
       ),
     );
 
     return cards;
+  }
+
+  static CyclePhase _phaseForCard(CyclePrediction prediction, DateTime? today) {
+    final phase = prediction.phaseToday;
+    if (phase != CyclePhase.ovulatory || today == null) return phase;
+    if (prediction.isFertile(dateOnly(today))) return CyclePhase.ovulatory;
+    final start = prediction.fertileStart;
+    if (start != null && dateOnly(today).isBefore(start)) {
+      return CyclePhase.follicular;
+    }
+    return CyclePhase.luteal;
   }
 
   static String _phaseTitle(CyclePhase phase) {

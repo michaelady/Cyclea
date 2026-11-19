@@ -15,6 +15,8 @@ abstract class SettingsStore {
   Future<void> setDisclaimerAccepted(bool value);
   Future<ThemeMode> themeMode();
   Future<void> setThemeMode(ThemeMode mode);
+  Future<int> tabIndex();
+  Future<void> setTabIndex(int index);
 }
 
 class MemoryLogStore implements LogStore {
@@ -50,11 +52,14 @@ class MemorySettingsStore implements SettingsStore {
   MemorySettingsStore({
     bool disclaimerAccepted = false,
     ThemeMode themeMode = ThemeMode.system,
+    int tabIndex = 0,
   }) : _disclaimer = disclaimerAccepted,
-       _theme = themeMode;
+       _theme = themeMode,
+       _tabIndex = tabIndex;
 
   bool _disclaimer;
   ThemeMode _theme;
+  int _tabIndex;
 
   @override
   Future<bool> disclaimerAccepted() async => _disclaimer;
@@ -67,4 +72,10 @@ class MemorySettingsStore implements SettingsStore {
 
   @override
   Future<void> setThemeMode(ThemeMode mode) async => _theme = mode;
+
+  @override
+  Future<int> tabIndex() async => _tabIndex;
+
+  @override
+  Future<void> setTabIndex(int index) async => _tabIndex = index;
 }

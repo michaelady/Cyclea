@@ -27,11 +27,11 @@ Cyclea’s bet: stay small, calm, and honest about uncertainty, and make **your*
 
 ## What Phase 1 includes
 
-1. **Auth and sync** — Welcome and Settings both offer **Continue as guest** and **Continue with Google**. Google is optional. Guest mode works fully with Hive on-device storage. Firebase project **cyclea-db587** is wired for web + Android; web Google Sign-In should complete after Pages deploy. Android still needs a SHA-1 in the Firebase Console.
+1. **Auth and sync** — Welcome offers **Continue as guest** and **Continue with Google**. Settings keeps **Continue with Google** for a guest and does not repeat “Continue as guest”. Google is optional. Guest mode works fully with Hive on-device storage. Firebase project **cyclea-db587** is wired for web + Android; web Google Sign-In should complete after Pages deploy. Android still needs a SHA-1 in the Firebase Console.
 2. **Tracking** — Calendar logging of period start/end, flow (spotting / light / medium / heavy), and ~24 symptoms. Edit or delete any day. Range picker for a whole period.
 3. **Predictions** — Next period and fertile window from logged cycle starts. Uncertainty widens for short histories and irregular cycles. Disclaimers on Home, Calendar, Insights, Settings, and this README.
 4. **Insights** — Average cycle length, variability, early vs on-time vs late (±2 days from *your* average), symptoms by phase, educational advice cards.
-5. **Settings** — Account, sync status, theme, seed demo data (for testers), privacy link, disclaimer, delete-all.
+5. **Settings** — Account, sync status, theme, privacy link, disclaimer, delete-all. Seed demo data is compiled out of production builds unless you pass `--dart-define=CYCLEA_TESTER_TOOLS=true`.
 6. **Privacy** — No ads, no selling health data, easy delete-all, [`web/privacy.html`](web/privacy.html).
 7. **Web publish** — GitHub Actions builds Flutter web from `main` onto `gh-pages`.
 8. **Android** — `applicationId` `com.cyclea.app`.
@@ -50,7 +50,7 @@ flutter run -d chrome
 flutter run -d android
 ```
 
-Guest mode works without signing in. Use **Settings → Seed demo data** to populate ~six months of slightly irregular cycles.
+Guest mode works without signing in. A development build can pass `--dart-define=CYCLEA_TESTER_TOOLS=true` and then use **Settings → Seed demo data** to populate ~six months of slightly irregular cycles.
 
 The UI uses a warm botanical look (Fraunces headings, Figtree body, custom blossom / petal / sprout / moon icons). Google Sign-In is optional beside guest.
 

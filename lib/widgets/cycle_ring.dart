@@ -22,6 +22,7 @@ class CycleRing extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final dark = Theme.of(context).brightness == Brightness.dark;
     final day = cycleDay;
     final fill = switch (phase) {
       CyclePhase.menstrual => CycleaColors.rose,
@@ -36,31 +37,49 @@ class CycleRing extends StatelessWidget {
       child: CustomPaint(
         painter: _BloomRingPainter(
           progress: day == null ? 0 : (day / cycleLength).clamp(0.0, 1.0),
-          track: scheme.outlineVariant.withValues(alpha: 0.45),
+          track: dark
+              ? CycleaColors.darkHeroTrack
+              : scheme.outlineVariant.withValues(alpha: 0.7),
           fill: fill,
-          wash: fill.withValues(alpha: 0.12),
+          wash: fill.withValues(alpha: dark ? 0.22 : 0.12),
         ),
         child: Center(
           child: day == null
               ? Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    CycleaIcon(CycleaGlyph.bud, filled: true, size: 28, color: fill),
+                    CycleaIcon(
+                      CycleaGlyph.bud,
+                      filled: true,
+                      size: 28,
+                      color: fill,
+                    ),
                     const SizedBox(height: 4),
                     Text(
                       'awaiting\na start',
                       textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.bodySmall,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: dark ? CycleaColors.darkHeroText : null,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ],
                 )
               : Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text('$day', style: Theme.of(context).textTheme.displaySmall),
+                    Text(
+                      '$day',
+                      style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                        color: dark ? CycleaColors.darkHeroText : null,
+                      ),
+                    ),
                     Text(
                       'day of ~$cycleLength',
-                      style: Theme.of(context).textTheme.bodySmall,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: dark ? CycleaColors.darkHeroMuted : null,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ],
                 ),

@@ -9,12 +9,13 @@ import 'package:cyclea/services/cycle_math.dart';
 class PredictionService {
   static CyclePrediction predict(CycleStats stats, {DateTime? now}) {
     final today = dateOnly(now ?? DateTime.now());
-    final cycleLength = stats.averageCycleLength?.round() ?? CycleMath.defaultCycleLength;
+    final cycleLength =
+        stats.averageCycleLength?.round() ?? CycleMath.defaultCycleLength;
     final periodLength =
         stats.averagePeriodLength?.round() ?? CycleMath.defaultPeriodLength;
     final lastStart = stats.lastPeriodStart;
 
-    if (lastStart == null) {
+    if (lastStart == null || lastStart.isAfter(today)) {
       return CyclePrediction(
         nextPeriodStart: null,
         nextPeriodEnd: null,
@@ -44,12 +45,16 @@ class PredictionService {
     );
 
     final cycleDay = daysBetween(lastStart, today) + 1;
-    final phase = CycleMath.phaseFor(
-      date: today,
-      spans: stats.periodSpans,
-      cycleLength: cycleLength,
-      lastPeriodStart: lastStart,
-    );
+    final onPeriod = stats.periodSpans.any((span) => span.contains(today));
+    final inFertile =
+        !today.isBefore(fertileStart) && !today.isAfter(fertileEnd);
+    final phase = onPeriod
+        ? CyclePhase.menstrual
+        : inFertile
+        ? CyclePhase.ovulatory
+        : today.isBefore(fertileStart)
+        ? CyclePhase.follicular
+        : CyclePhase.luteal;
 
     return CyclePrediction(
       nextPeriodStart: nextStart,

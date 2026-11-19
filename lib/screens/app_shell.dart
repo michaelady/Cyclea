@@ -2,19 +2,13 @@ import 'package:cyclea/screens/calendar_screen.dart';
 import 'package:cyclea/screens/home_screen.dart';
 import 'package:cyclea/screens/insights_screen.dart';
 import 'package:cyclea/screens/settings_screen.dart';
+import 'package:cyclea/state/cycle_controller.dart';
 import 'package:cyclea/theme/cyclea_icons.dart';
 import 'package:cyclea/theme/cyclea_theme.dart';
 import 'package:flutter/material.dart';
 
-class AppShell extends StatefulWidget {
+class AppShell extends StatelessWidget {
   const AppShell({super.key});
-
-  @override
-  State<AppShell> createState() => _AppShellState();
-}
-
-class _AppShellState extends State<AppShell> {
-  int _index = 0;
 
   static const _pages = [
     HomeScreen(),
@@ -26,22 +20,38 @@ class _AppShellState extends State<AppShell> {
   static const _destinations = [
     NavigationDestination(
       icon: CycleaIcon(CycleaGlyph.blossom, semanticLabel: 'Home'),
-      selectedIcon: CycleaIcon(CycleaGlyph.blossom, filled: true, semanticLabel: 'Home'),
+      selectedIcon: CycleaIcon(
+        CycleaGlyph.blossom,
+        filled: true,
+        semanticLabel: 'Home',
+      ),
       label: 'Home',
     ),
     NavigationDestination(
       icon: CycleaIcon(CycleaGlyph.calendarBloom, semanticLabel: 'Calendar'),
-      selectedIcon: CycleaIcon(CycleaGlyph.calendarBloom, filled: true, semanticLabel: 'Calendar'),
+      selectedIcon: CycleaIcon(
+        CycleaGlyph.calendarBloom,
+        filled: true,
+        semanticLabel: 'Calendar',
+      ),
       label: 'Calendar',
     ),
     NavigationDestination(
       icon: CycleaIcon(CycleaGlyph.sprout, semanticLabel: 'Insights'),
-      selectedIcon: CycleaIcon(CycleaGlyph.sprout, filled: true, semanticLabel: 'Insights'),
+      selectedIcon: CycleaIcon(
+        CycleaGlyph.sprout,
+        filled: true,
+        semanticLabel: 'Insights',
+      ),
       label: 'Insights',
     ),
     NavigationDestination(
       icon: CycleaIcon(CycleaGlyph.moon, semanticLabel: 'Settings'),
-      selectedIcon: CycleaIcon(CycleaGlyph.moon, filled: true, semanticLabel: 'Settings'),
+      selectedIcon: CycleaIcon(
+        CycleaGlyph.moon,
+        filled: true,
+        semanticLabel: 'Settings',
+      ),
       label: 'Settings',
     ),
   ];
@@ -71,18 +81,19 @@ class _AppShellState extends State<AppShell> {
 
   @override
   Widget build(BuildContext context) {
+    final controller = AppScope.of(context);
+    final index = controller.tabIndex;
     final wide = isWideLayout(context);
-    final body = AnimatedSwitcher(
-      duration: const Duration(milliseconds: 220),
-      child: KeyedSubtree(key: ValueKey(_index), child: _pages[_index]),
-    );
+    // Swap tabs immediately. A fade leaves the incoming page at opacity 0,
+    // which drops the first tap during the transition.
+    final body = _pages[index];
     if (wide) {
       return Scaffold(
         body: Row(
           children: [
             NavigationRail(
-              selectedIndex: _index,
-              onDestinationSelected: (value) => setState(() => _index = value),
+              selectedIndex: index,
+              onDestinationSelected: controller.setTabIndex,
               labelType: NavigationRailLabelType.all,
               destinations: _rail,
             ),
@@ -95,9 +106,9 @@ class _AppShellState extends State<AppShell> {
     return Scaffold(
       body: body,
       bottomNavigationBar: NavigationBar(
-        selectedIndex: _index,
+        selectedIndex: index,
         destinations: _destinations,
-        onDestinationSelected: (value) => setState(() => _index = value),
+        onDestinationSelected: controller.setTabIndex,
       ),
     );
   }

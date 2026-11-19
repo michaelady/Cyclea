@@ -1,7 +1,7 @@
 name: cyclea
 description: Cyclea is a privacy-respecting menstrual cycle tracker for web and Android, with personal statistics and educational advice.
 publish_to: "none"
-version: 1.0.0+1
+version: 1.0.1+2
 
 environment:
   sdk: ^3.13.3

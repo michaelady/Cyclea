@@ -36,7 +36,10 @@ class InsightsScreen extends StatelessWidget {
                     color: Theme.of(context).colorScheme.primary,
                   ),
                   const SizedBox(width: 10),
-                  Text('Insights', style: Theme.of(context).textTheme.headlineMedium),
+                  Text(
+                    'Insights',
+                    style: Theme.of(context).textTheme.headlineMedium,
+                  ),
                 ],
               ),
               const SizedBox(height: 4),
@@ -51,8 +54,7 @@ class InsightsScreen extends StatelessWidget {
                 const CycleaEmptyState(
                   glyph: CycleaGlyph.sprout,
                   title: 'Your pattern will grow here',
-                  body:
-                      'Log at least two period starts to see averages, variability, and early/on-time/late rhythm. Seeded demo data in Settings is the fastest way to preview.',
+                  body: 'Log at least two period starts to see averages, variability, and early/on-time/late rhythm.',
                 ),
                 const SizedBox(height: 16),
               ],
@@ -71,7 +73,9 @@ class InsightsScreen extends StatelessWidget {
                     glyph: CycleaGlyph.spark,
                     label: 'Variability',
                     value: sd == null ? '—' : '±${sd.toStringAsFixed(1)}',
-                    caption: stats.irregular ? 'Wider than usual' : 'Sample std. dev.',
+                    caption: stats.irregular
+                        ? 'Wider than usual'
+                        : 'Sample std. dev.',
                   ),
                 ],
               ),
@@ -84,13 +88,17 @@ class InsightsScreen extends StatelessWidget {
                     value: stats.averagePeriodLength == null
                         ? '—'
                         : '${stats.averagePeriodLength!.toStringAsFixed(1)}d',
-                    caption: stats.lastPeriodStart == null ? 'Log bleeding days' : 'Average span',
+                    caption: stats.lastPeriodStart == null
+                        ? 'Log bleeding days'
+                        : 'Average span',
                   ),
                   const SizedBox(width: 12),
                   StatCard(
                     glyph: CycleaGlyph.moon,
                     label: 'Range',
-                    value: stats.minCycle == null ? '—' : '${stats.minCycle}–${stats.maxCycle}',
+                    value: stats.minCycle == null
+                        ? '—'
+                        : '${stats.minCycle}–${stats.maxCycle}',
                     caption: 'Shortest to longest',
                   ),
                 ],
@@ -109,7 +117,10 @@ class InsightsScreen extends StatelessWidget {
                           color: Theme.of(context).colorScheme.primary,
                         ),
                         const SizedBox(width: 8),
-                        Text('Early · on-time · late', style: Theme.of(context).textTheme.titleLarge),
+                        Text(
+                          'Early · on-time · late',
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
                       ],
                     ),
                     const SizedBox(height: 6),
@@ -145,7 +156,10 @@ class InsightsScreen extends StatelessWidget {
                     ],
                     if (stats.cycleLengths.isNotEmpty) ...[
                       const SizedBox(height: 16),
-                      Text('Recent cycle lengths', style: Theme.of(context).textTheme.titleSmall),
+                      Text(
+                        'Recent cycle lengths',
+                        style: Theme.of(context).textTheme.titleSmall,
+                      ),
                       const SizedBox(height: 8),
                       _CycleBars(lengths: stats.cycleLengths),
                     ],
@@ -166,7 +180,10 @@ class InsightsScreen extends StatelessWidget {
                           color: Theme.of(context).colorScheme.primary,
                         ),
                         const SizedBox(width: 8),
-                        Text('Symptoms by phase', style: Theme.of(context).textTheme.titleLarge),
+                        Text(
+                          'Symptoms by phase',
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
                       ],
                     ),
                     const SizedBox(height: 6),
@@ -189,7 +206,10 @@ class InsightsScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              Text('Advice cards', style: Theme.of(context).textTheme.headlineSmall),
+              Text(
+                'Advice cards',
+                style: Theme.of(context).textTheme.headlineSmall,
+              ),
               const SizedBox(height: 8),
               for (final card in controller.adviceCards) ...[
                 AdviceCardView(card: card),
@@ -210,7 +230,9 @@ class _CycleBars extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final recent = lengths.length > 8 ? lengths.sublist(lengths.length - 8) : lengths;
+    final recent = lengths.length > 8
+        ? lengths.sublist(lengths.length - 8)
+        : lengths;
     final maxLen = recent.reduce((a, b) => a > b ? a : b).toDouble();
     return SizedBox(
       height: 92,
@@ -224,7 +246,10 @@ class _CycleBars extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    Text('$length', style: Theme.of(context).textTheme.labelMedium),
+                    Text(
+                      '$length',
+                      style: Theme.of(context).textTheme.labelMedium,
+                    ),
                     const SizedBox(height: 4),
                     Flexible(
                       child: FractionallySizedBox(
@@ -256,7 +281,8 @@ class _PhaseSymptoms extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final top = counts.entries.toList()..sort((a, b) => b.value.compareTo(a.value));
+    final top = counts.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
     final shown = top.take(4).toList();
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
@@ -266,7 +292,10 @@ class _PhaseSymptoms extends StatelessWidget {
           Text(phase.label, style: Theme.of(context).textTheme.titleSmall),
           const SizedBox(height: 6),
           if (shown.isEmpty)
-            Text('No symptoms logged in this phase yet.', style: Theme.of(context).textTheme.bodySmall)
+            Text(
+              'No symptoms logged in this phase yet.',
+              style: Theme.of(context).textTheme.bodySmall,
+            )
           else
             Wrap(
               spacing: 8,
@@ -279,7 +308,9 @@ class _PhaseSymptoms extends StatelessWidget {
                       filled: true,
                       size: 16,
                     ),
-                    label: Text('${SymptomCatalog.labelFor(entry.key)} · ${entry.value}'),
+                    label: Text(
+                      '${SymptomCatalog.labelFor(entry.key)} · ${entry.value}',
+                    ),
                   ),
               ],
             ),

@@ -35,6 +35,7 @@ class CycleController extends ChangeNotifier {
   bool _loading = true;
   String? _error;
   String _syncLabel = 'Local only';
+  int _tabIndex = 0;
   LogStore? _remote;
 
   DateTime get _today => dateOnly(now?.call() ?? DateTime.now());
@@ -47,17 +48,22 @@ class CycleController extends ChangeNotifier {
   bool get firebaseReady => auth.firebaseReady;
   bool get isGuest => _user == null;
   String get syncLabel => _syncLabel;
-  List<DailyLog> get logs => _logs.values.toList()
-    ..sort((a, b) => a.date.compareTo(b.date));
+  int get tabIndex => _tabIndex;
+  List<DailyLog> get logs =>
+      _logs.values.toList()..sort((a, b) => a.date.compareTo(b.date));
 
   DailyLog? logOn(DateTime date) => _logs[dateKey(date)];
 
   CycleStats get stats => CycleMath.statsFor(_logs.values, now: _today);
 
-  CyclePrediction get prediction => PredictionService.predict(stats, now: _today);
+  CyclePrediction get prediction =>
+      PredictionService.predict(stats, now: _today);
 
-  List<AdviceCard> get adviceCards =>
-      AdviceEngine.cardsFor(stats: stats, prediction: prediction);
+  List<AdviceCard> get adviceCards => AdviceEngine.cardsFor(
+    stats: stats,
+    prediction: prediction,
+    today: _today,
+  );
 
   Future<void> bootstrap() async {
     _loading = true;
@@ -65,6 +71,7 @@ class CycleController extends ChangeNotifier {
     try {
       _disclaimerAccepted = await settings.disclaimerAccepted();
       _themeMode = await settings.themeMode();
+      _tabIndex = await settings.tabIndex();
       _logs
         ..clear()
         ..addAll(await localLogs.loadAll());
@@ -139,7 +146,17 @@ class CycleController extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> setTabIndex(int index) async {
+    final next = index.clamp(0, 3);
+    if (_tabIndex == next) return;
+    _tabIndex = next;
+    notifyListeners();
+    await settings.setTabIndex(next);
+  }
+
   Future<void> saveLog(DailyLog log) async {
+    final day = dateOnly(log.date);
+    if (day.isAfter(_today)) return;
     final cleaned = log.copyWith(
       date: dateOnly(log.date),
       isPeriod: log.isPeriod || log.flow.isBleeding,
@@ -163,7 +180,11 @@ class CycleController extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> markPeriodRange(DateTime start, DateTime end, {FlowLevel? flow}) async {
+  Future<void> markPeriodRange(
+    DateTime start,
+    DateTime end, {
+    FlowLevel? flow,
+  }) async {
     final first = dateOnly(start);
     final last = dateOnly(end);
     final from = first.isBefore(last) ? first : last;
@@ -171,7 +192,8 @@ class CycleController extends ChangeNotifier {
     final days = daysInRange(from, to).toList();
     for (var i = 0; i < days.length; i++) {
       final existing = logOn(days[i]);
-      final autoFlow = flow ??
+      final autoFlow =
+          flow ??
           (i == 0
               ? FlowLevel.heavy
               : i == days.length - 1
@@ -191,11 +213,15 @@ class CycleController extends ChangeNotifier {
   }
 
   Future<void> seedDemoData() async {
-    final demo = DemoData.generate(now: _today);
-    for (final log in demo) {
-      _logs[dateKey(log.date)] = log;
-    }
+    final demo = DemoData.generate(now: _today)
+        .where((log) => !dateOnly(log.date).isAfter(_today))
+        .toList();
+    _logs
+      ..clear()
+      ..addAll({for (final log in demo) dateKey(log.date): log});
+    await localLogs.clear();
     await localLogs.upsertAll(demo);
+    await _remote?.clear();
     await _remote?.upsertAll(demo);
     notifyListeners();
   }

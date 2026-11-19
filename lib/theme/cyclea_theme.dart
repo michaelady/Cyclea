@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 class CycleaColors {
@@ -16,6 +17,23 @@ class CycleaColors {
   static const ink = Color(0xFF2C2426);
   static const muted = Color(0xFF6E5F62);
   static const lilac = Color(0xFF9A6B84);
+  static const darkHeroStart = Color(0xFF5C4046);
+  static const darkHeroMid = Color(0xFF4E3E3C);
+  static const darkHeroEnd = Color(0xFF3E4C45);
+  static const darkHeroText = Color(0xFFFFF7F4);
+  static const darkHeroMuted = Color(0xFFF3E4DE);
+  static const darkHeroTrack = Color(0xFFE7D2CC);
+}
+
+class CycleaScrollBehavior extends MaterialScrollBehavior {
+  const CycleaScrollBehavior();
+
+  @override
+  Set<PointerDeviceKind> get dragDevices => const {
+    PointerDeviceKind.touch,
+    PointerDeviceKind.stylus,
+    PointerDeviceKind.trackpad,
+  };
 }
 
 class CycleaTheme {
@@ -72,7 +90,9 @@ class CycleaTheme {
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(24),
-          side: BorderSide(color: scheme.outlineVariant.withValues(alpha: 0.55)),
+          side: BorderSide(
+            color: scheme.outlineVariant.withValues(alpha: 0.55),
+          ),
         ),
       ),
       navigationBarTheme: NavigationBarThemeData(
@@ -94,21 +114,46 @@ class CycleaTheme {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
         selectedColor: scheme.primary.withValues(alpha: 0.16),
         backgroundColor: scheme.surfaceContainerHighest.withValues(alpha: 0.55),
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        labelPadding: const EdgeInsets.symmetric(horizontal: 6),
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 15),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+          minimumSize: const Size(48, 44),
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+          tapTargetSize: MaterialTapTargetSize.padded,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18),
+          ),
           textStyle: textTheme.labelLarge,
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 15),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+          minimumSize: const Size(48, 44),
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+          tapTargetSize: MaterialTapTargetSize.padded,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18),
+          ),
           side: BorderSide(color: scheme.outline.withValues(alpha: 0.7)),
           textStyle: textTheme.labelLarge,
+        ),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          minimumSize: const Size(48, 44),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          tapTargetSize: MaterialTapTargetSize.padded,
+          textStyle: textTheme.labelLarge,
+        ),
+      ),
+      segmentedButtonTheme: SegmentedButtonThemeData(
+        style: ButtonStyle(
+          minimumSize: const WidgetStatePropertyAll(Size(48, 44)),
+          tapTargetSize: MaterialTapTargetSize.padded,
+          visualDensity: VisualDensity.standard,
+          textStyle: WidgetStatePropertyAll(textTheme.labelLarge),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
@@ -144,19 +189,44 @@ class CycleaTheme {
       headlineLarge: headline.copyWith(fontSize: 32, color: scheme.onSurface),
       headlineMedium: headline.copyWith(fontSize: 26, color: scheme.onSurface),
       headlineSmall: headline.copyWith(fontSize: 21, color: scheme.onSurface),
-      titleLarge: body.copyWith(fontSize: 18, fontWeight: FontWeight.w700, color: scheme.onSurface),
-      titleMedium: body.copyWith(fontSize: 16, fontWeight: FontWeight.w600, color: scheme.onSurface),
-      titleSmall: body.copyWith(fontSize: 14, fontWeight: FontWeight.w600, color: scheme.onSurface),
+      titleLarge: body.copyWith(
+        fontSize: 18,
+        fontWeight: FontWeight.w700,
+        color: scheme.onSurface,
+      ),
+      titleMedium: body.copyWith(
+        fontSize: 16,
+        fontWeight: FontWeight.w600,
+        color: scheme.onSurface,
+      ),
+      titleSmall: body.copyWith(
+        fontSize: 14,
+        fontWeight: FontWeight.w600,
+        color: scheme.onSurface,
+      ),
       bodyLarge: body.copyWith(fontSize: 16, color: scheme.onSurface),
       bodyMedium: body.copyWith(fontSize: 14, color: scheme.onSurface),
-      bodySmall: body.copyWith(fontSize: 12.5, color: scheme.onSurfaceVariant, height: 1.4),
-      labelLarge: body.copyWith(fontSize: 14.5, fontWeight: FontWeight.w700, color: scheme.onSurface),
-      labelMedium: body.copyWith(fontSize: 12, fontWeight: FontWeight.w600, color: scheme.onSurface),
+      bodySmall: body.copyWith(
+        fontSize: 12.5,
+        color: scheme.onSurfaceVariant,
+        height: 1.4,
+      ),
+      labelLarge: body.copyWith(
+        fontSize: 14.5,
+        fontWeight: FontWeight.w700,
+        color: scheme.onSurface,
+      ),
+      labelMedium: body.copyWith(
+        fontSize: 12,
+        fontWeight: FontWeight.w600,
+        color: scheme.onSurface,
+      ),
     );
   }
 }
 
-bool isWideLayout(BuildContext context) => MediaQuery.sizeOf(context).width >= 840;
+bool isWideLayout(BuildContext context) =>
+    MediaQuery.sizeOf(context).width >= 840;
 
 double contentWidth(BuildContext context) {
   final width = MediaQuery.sizeOf(context).width;

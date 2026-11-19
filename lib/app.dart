@@ -20,13 +20,16 @@ class CycleaApp extends StatelessWidget {
           return MaterialApp(
             title: 'Cyclea',
             debugShowCheckedModeBanner: false,
+            scrollBehavior: const CycleaScrollBehavior(),
             localizationsDelegates: GlobalMaterialLocalizations.delegates,
             supportedLocales: const [Locale('en')],
             theme: CycleaTheme.light(),
             darkTheme: CycleaTheme.dark(),
             themeMode: controller.themeMode,
             home: controller.loading
-                ? const Scaffold(body: Center(child: CircularProgressIndicator()))
+                ? const Scaffold(
+                    body: Center(child: CircularProgressIndicator()),
+                  )
                 : controller.disclaimerAccepted
                 ? const AppShell()
                 : const WelcomeScreen(),

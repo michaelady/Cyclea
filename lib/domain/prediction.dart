@@ -28,6 +28,9 @@ class CyclePrediction {
   final int expectedCycleLength;
   final CyclePhase phaseToday;
 
+  bool get showsEstimate =>
+      nextPeriodStart != null && fertileStart != null && fertileEnd != null;
+
   DateTime? get earliestNextPeriod {
     final start = nextPeriodStart;
     if (start == null) return null;
