@@ -9,6 +9,7 @@ permissions:
   contents: write
   pages: write
   id-token: write
+  actions: read
 
 concurrency:
   group: pages
@@ -49,6 +50,23 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           path: build/web
+
+      # deploy-pages lists artifacts immediately, and the list API can still
+      # return nothing for a moment after upload-artifact reports success.
+      - name: Wait for the Pages artifact to be listed
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for attempt in 1 2 3 4 5 6 7 8 9 10 11 12; do
+            count="$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/artifacts" --jq '[.artifacts[] | select(.name=="github-pages" and .expired==false)] | length')"
+            echo "attempt ${attempt}: github-pages artifacts=${count}"
+            if [ "${count}" != "0" ]; then
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "The github-pages artifact was never listed."
+          exit 1
 
       - name: Deploy to GitHub Pages
         id: deployment
