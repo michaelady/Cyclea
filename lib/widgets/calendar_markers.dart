@@ -145,7 +145,7 @@ class _DayMarkPainter extends CustomPainter {
     } else if (band) {
       _dots(
         canvas,
-        Offset(size.width / 2, size.height / 2),
+        Offset(size.width / 2, size.height - 5),
         stripe.withValues(alpha: 0.85),
       );
     }
@@ -212,8 +212,8 @@ class _DayMarkPainter extends CustomPainter {
 
   void _dots(Canvas canvas, Offset center, Color color) {
     final paint = Paint()..color = color;
-    for (final dx in const [-7.0, 0.0, 7.0]) {
-      canvas.drawCircle(center.translate(dx, 0), 2.2, paint);
+    for (final dx in const [-6.0, 0.0, 6.0]) {
+      canvas.drawCircle(center.translate(dx, 0), 1.7, paint);
     }
   }
 
