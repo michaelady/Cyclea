@@ -1,0 +1,76 @@
+name: Android release APK
+
+# Run by hand once CYCLEA_KEYSTORE_BASE64, CYCLEA_STORE_PASSWORD,
+# CYCLEA_KEY_PASSWORD, and CYCLEA_KEY_ALIAS exist as repository secrets.
+# This token cannot create those secrets, so the job is not on every push.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Dependencies
+        run: flutter pub get
+
+      - name: Require the release keystore secrets
+        env:
+          CYCLEA_KEYSTORE_BASE64: ${{ secrets.CYCLEA_KEYSTORE_BASE64 }}
+          CYCLEA_STORE_PASSWORD: ${{ secrets.CYCLEA_STORE_PASSWORD }}
+          CYCLEA_KEY_PASSWORD: ${{ secrets.CYCLEA_KEY_PASSWORD }}
+          CYCLEA_KEY_ALIAS: ${{ secrets.CYCLEA_KEY_ALIAS }}
+        run: |
+          test -n "$CYCLEA_KEYSTORE_BASE64" || { echo "Missing secret CYCLEA_KEYSTORE_BASE64"; exit 1; }
+          test -n "$CYCLEA_STORE_PASSWORD" || { echo "Missing secret CYCLEA_STORE_PASSWORD"; exit 1; }
+          test -n "$CYCLEA_KEY_PASSWORD" || { echo "Missing secret CYCLEA_KEY_PASSWORD"; exit 1; }
+          test -n "$CYCLEA_KEY_ALIAS" || { echo "Missing secret CYCLEA_KEY_ALIAS"; exit 1; }
+
+      - name: Decode the release keystore
+        env:
+          CYCLEA_KEYSTORE_BASE64: ${{ secrets.CYCLEA_KEYSTORE_BASE64 }}
+          CYCLEA_STORE_PASSWORD: ${{ secrets.CYCLEA_STORE_PASSWORD }}
+          CYCLEA_KEY_PASSWORD: ${{ secrets.CYCLEA_KEY_PASSWORD }}
+          CYCLEA_KEY_ALIAS: ${{ secrets.CYCLEA_KEY_ALIAS }}
+        run: |
+          echo "$CYCLEA_KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/cyclea-release.jks"
+          printf 'storePassword=%s\nkeyPassword=%s\nkeyAlias=%s\nstoreFile=%s\n' \
+            "$CYCLEA_STORE_PASSWORD" \
+            "$CYCLEA_KEY_PASSWORD" \
+            "$CYCLEA_KEY_ALIAS" \
+            "$RUNNER_TEMP/cyclea-release.jks" > android/key.properties
+
+      - name: Read versionName
+        id: version
+        run: |
+          name="$(awk '/^version:/ { split($2, a, "+"); print a[1] }' pubspec.yaml)"
+          echo "name=$name" >> "$GITHUB_OUTPUT"
+
+      - name: Build release APK
+        run: flutter build apk --release
+
+      - name: Name the artifact
+        run: |
+          out="cyclea-${{ steps.version.outputs.name }}.apk"
+          cp build/app/outputs/flutter-apk/app-release.apk "$out"
+          case "$out" in
+            *debug*|*Debug*|*DEBUG*) echo "filename must not contain debug"; exit 1 ;;
+          esac
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cyclea-${{ steps.version.outputs.name }}
+          path: cyclea-${{ steps.version.outputs.name }}.apk
+          if-no-files-found: error

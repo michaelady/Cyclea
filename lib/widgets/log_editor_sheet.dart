@@ -164,10 +164,20 @@ class _LogEditorSheetState extends State<LogEditorSheet> {
                     (item) => item != FlowLevel.none,
                   ))
                     ChoiceChip(
+                      visualDensity: VisualDensity.standard,
+                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 10,
+                      ),
+                      labelPadding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 4,
+                      ),
                       avatar: CycleaIcon(
                         CycleaGlyph.drop,
                         filled: _flow == level,
-                        size: 14,
+                        size: 16,
                       ),
                       label: Text(level.label),
                       selected: _flow == level,
@@ -225,6 +235,16 @@ class _LogEditorSheetState extends State<LogEditorSheet> {
             children: [
               for (final item in items)
                 FilterChip(
+                  visualDensity: VisualDensity.standard,
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 10,
+                  ),
+                  labelPadding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 4,
+                  ),
                   avatar: CycleaIcon(
                     glyphForSymptom(item.id),
                     filled: _symptoms.contains(item.id),

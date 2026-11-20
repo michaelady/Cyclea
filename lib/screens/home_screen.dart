@@ -1,3 +1,4 @@
+import 'package:cyclea/domain/dates.dart';
 import 'package:cyclea/domain/prediction.dart';
 import 'package:cyclea/domain/symptom.dart';
 import 'package:cyclea/state/cycle_controller.dart';
@@ -84,10 +85,17 @@ class HomeScreen extends StatelessWidget {
                         Theme.of(context).brightness == Brightness.dark;
                     final onHero = dark ? CycleaColors.darkHeroText : null;
                     final mutedHero = dark ? CycleaColors.darkHeroMuted : null;
+                    final nextStart = prediction.nextPeriodStart;
+                    final daysUntil = nextStart == null
+                        ? null
+                        : dateOnly(nextStart)
+                              .difference(dateOnly(today))
+                              .inDays;
                     final ring = CycleRing(
                       cycleDay: prediction.cycleDay,
                       cycleLength: prediction.expectedCycleLength,
                       phase: prediction.phaseToday,
+                      daysUntilPeriod: daysUntil,
                     );
                     final details = Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -287,11 +295,25 @@ class _ForecastBlock extends StatelessWidget {
               color: Theme.of(context).colorScheme.primary,
             ),
             const SizedBox(width: 6),
-            Text(title, style: Theme.of(context).textTheme.bodySmall),
+            Expanded(
+              child: Text(
+                title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ),
           ],
         ),
         const SizedBox(height: 6),
-        Text(value, style: Theme.of(context).textTheme.titleLarge),
+        SizedBox(
+          width: double.infinity,
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(value, style: Theme.of(context).textTheme.titleLarge),
+          ),
+        ),
         const SizedBox(height: 4),
         Text(caption, style: Theme.of(context).textTheme.bodySmall),
       ],

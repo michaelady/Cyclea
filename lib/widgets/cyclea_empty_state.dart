@@ -29,11 +29,11 @@ class CycleaEmptyState extends StatelessWidget {
               shape: BoxShape.circle,
             ),
             child: Padding(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(14),
               child: CycleaIcon(
                 glyph,
                 filled: true,
-                size: 28,
+                size: 32,
                 color: scheme.primary,
               ),
             ),
@@ -42,10 +42,7 @@ class CycleaEmptyState extends StatelessWidget {
           Text(title, style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 6),
           Text(body, style: Theme.of(context).textTheme.bodyMedium),
-          if (action != null) ...[
-            const SizedBox(height: 14),
-            action!,
-          ],
+          if (action != null) ...[const SizedBox(height: 14), action!],
         ],
       ),
     );

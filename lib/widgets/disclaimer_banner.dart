@@ -34,10 +34,8 @@ class DisclaimerBanner extends StatelessWidget {
           Expanded(
             child: Text(
               compact ? LegalCopy.shortDisclaimer : LegalCopy.fullDisclaimer,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: scheme.onTertiaryContainer,
-                height: 1.35,
-              ),
+              style: Theme.of(context).textTheme.bodySmall
+                  ?.copyWith(color: scheme.onTertiaryContainer, height: 1.35),
             ),
           ),
         ],
@@ -65,13 +63,15 @@ class SurfaceCard extends StatelessWidget {
     final card = DecoratedBox(
       decoration: BoxDecoration(
         color: dark ? const Color(0xFF26211F) : Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: scheme.outlineVariant.withValues(alpha: 0.55)),
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(
+          color: scheme.outlineVariant.withValues(alpha: dark ? 0.45 : 0.4),
+        ),
         boxShadow: [
           BoxShadow(
-            color: CycleaColors.rose.withValues(alpha: dark ? 0.08 : 0.07),
-            blurRadius: 22,
-            offset: const Offset(0, 10),
+            color: CycleaColors.rose.withValues(alpha: dark ? 0.16 : 0.08),
+            blurRadius: 28,
+            offset: const Offset(0, 14),
           ),
         ],
       ),

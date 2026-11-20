@@ -136,8 +136,10 @@ class SettingsScreen extends StatelessWidget {
                     SegmentedButton<ThemeMode>(
                       showSelectedIcon: false,
                       style: const ButtonStyle(
-                        minimumSize: WidgetStatePropertyAll(Size(48, 44)),
+                        minimumSize: WidgetStatePropertyAll(Size(72, 48)),
+                        fixedSize: WidgetStatePropertyAll(Size.fromHeight(48)),
                         tapTargetSize: MaterialTapTargetSize.padded,
+                        visualDensity: VisualDensity.standard,
                       ),
                       segments: const [
                         ButtonSegment(
@@ -236,14 +238,20 @@ class SettingsScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 12),
                     OutlinedButton(
+                      style: const ButtonStyle(
+                        minimumSize: WidgetStatePropertyAll(Size(44, 48)),
+                        tapTargetSize: MaterialTapTargetSize.padded,
+                        visualDensity: VisualDensity.standard,
+                      ),
                       onPressed: () => _openPrivacy(context),
                       child: const Text('Open privacy page'),
                     ),
                     const SizedBox(height: 8),
-                    TextButton(
+                    OutlinedButton(
                       style: const ButtonStyle(
-                        minimumSize: WidgetStatePropertyAll(Size(48, 44)),
+                        minimumSize: WidgetStatePropertyAll(Size(44, 48)),
                         tapTargetSize: MaterialTapTargetSize.padded,
+                        visualDensity: VisualDensity.standard,
                       ),
                       onPressed: () => _confirmDelete(context, controller),
                       child: const Text('Delete all Cyclea data'),

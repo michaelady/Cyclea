@@ -11,12 +11,14 @@ class CycleRing extends StatelessWidget {
     required this.cycleDay,
     required this.cycleLength,
     required this.phase,
+    this.daysUntilPeriod,
     this.size = 176,
   });
 
   final int? cycleDay;
   final int cycleLength;
   final CyclePhase phase;
+  final int? daysUntilPeriod;
   final double size;
 
   @override
@@ -26,7 +28,7 @@ class CycleRing extends StatelessWidget {
     final day = cycleDay;
     final fill = switch (phase) {
       CyclePhase.menstrual => CycleaColors.rose,
-      CyclePhase.ovulatory => CycleaColors.sage,
+      CyclePhase.ovulatory => CycleaColors.tide,
       CyclePhase.luteal => CycleaColors.sand,
       CyclePhase.follicular => scheme.primary,
       CyclePhase.unknown => scheme.outline,
@@ -75,6 +77,16 @@ class CycleRing extends StatelessWidget {
                       ),
                     ),
                     Text(
+                      _centerLine(phase, daysUntilPeriod),
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: dark
+                            ? CycleaColors.darkHeroText
+                            : CycleaColors.ink,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    Text(
                       'day of ~$cycleLength',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: dark ? CycleaColors.darkHeroMuted : null,
@@ -87,6 +99,14 @@ class CycleRing extends StatelessWidget {
       ),
     );
   }
+}
+
+String _centerLine(CyclePhase phase, int? daysUntilPeriod) {
+  if (phase == CyclePhase.menstrual) return 'Period day';
+  if (daysUntilPeriod == null) return 'Log a period start';
+  if (daysUntilPeriod <= 0) return 'Period expected';
+  if (daysUntilPeriod == 1) return 'Period in 1 day';
+  return 'Period in $daysUntilPeriod days';
 }
 
 class _BloomRingPainter extends CustomPainter {
