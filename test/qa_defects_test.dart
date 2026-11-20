@@ -411,10 +411,75 @@ void main() {
       tester.getSize(find.byType(SegmentedButton<ThemeMode>)).height,
       greaterThanOrEqualTo(44),
     );
-    final deleteAll = find.widgetWithText(TextButton, 'Delete all Cyclea data');
+    final deleteAll = find.widgetWithText(
+      OutlinedButton,
+      'Delete all Cyclea data',
+    );
     await tester.ensureVisible(deleteAll);
     await tester.pumpAndSettle();
     expect(tester.getSize(deleteAll).height, greaterThanOrEqualTo(44));
+    expect(
+      tester
+          .getSize(find.widgetWithText(OutlinedButton, 'Open privacy page'))
+          .height,
+      greaterThanOrEqualTo(44),
+    );
+  });
+
+  testWidgets('phone controls and flow chips are at least 44 px', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    final todayDate = dateOnly(DateTime.now());
+    final controller = CycleController(
+      localLogs: MemoryLogStore(),
+      settings: MemorySettingsStore(disclaimerAccepted: true),
+      auth: AuthService.disabled(),
+    );
+    await controller.bootstrap();
+    await controller.saveLog(
+      DailyLog(
+        date: todayDate,
+        isPeriod: true,
+        flow: FlowLevel.medium,
+        updatedAt: DateTime.utc(2026, 1, 1),
+      ),
+    );
+    await tester.pumpWidget(CycleaApp(controller: controller));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Calendar'));
+    await tester.pumpAndSettle();
+    expect(
+      tester
+          .getSize(find.widgetWithText(FilledButton, 'Log period range'))
+          .height,
+      greaterThanOrEqualTo(44),
+    );
+
+    final edit = find.text('Edit log');
+    await tester.scrollUntilVisible(
+      edit,
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(edit);
+    await tester.pumpAndSettle();
+    final flow = find.widgetWithText(ChoiceChip, 'Medium');
+    await tester.ensureVisible(flow);
+    await tester.pumpAndSettle();
+    final flowSize = tester.getSize(flow);
+    expect(flowSize.height, greaterThanOrEqualTo(44));
+    expect(flowSize.width, greaterThanOrEqualTo(44));
+    final symptom = find.widgetWithText(FilterChip, 'Cramps');
+    await tester.ensureVisible(symptom);
+    await tester.pumpAndSettle();
+    final symptomSize = tester.getSize(symptom);
+    expect(symptomSize.height, greaterThanOrEqualTo(44));
+    expect(symptomSize.width, greaterThanOrEqualTo(44));
   });
 
   test('selected tab is restored after reload', () async {

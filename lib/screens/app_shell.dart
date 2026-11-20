@@ -93,7 +93,10 @@ class AppShell extends StatelessWidget {
           children: [
             NavigationRail(
               selectedIndex: index,
-              onDestinationSelected: controller.setTabIndex,
+              onDestinationSelected: (value) {
+                FocusManager.instance.primaryFocus?.unfocus();
+                controller.setTabIndex(value);
+              },
               labelType: NavigationRailLabelType.all,
               destinations: _rail,
             ),
@@ -107,8 +110,14 @@ class AppShell extends StatelessWidget {
       body: body,
       bottomNavigationBar: NavigationBar(
         selectedIndex: index,
+        animationDuration: Duration.zero,
         destinations: _destinations,
-        onDestinationSelected: controller.setTabIndex,
+        onDestinationSelected: (value) {
+          // Drop focus before the new page is shown. On the web the first
+          // tap after a tab change can otherwise be spent moving focus.
+          FocusManager.instance.primaryFocus?.unfocus();
+          controller.setTabIndex(value);
+        },
       ),
     );
   }

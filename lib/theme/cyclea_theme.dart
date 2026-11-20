@@ -17,6 +17,12 @@ class CycleaColors {
   static const ink = Color(0xFF2C2426);
   static const muted = Color(0xFF6E5F62);
   static const lilac = Color(0xFF9A6B84);
+  static const period = Color(0xFFC4316C);
+  static const periodSoft = Color(0xFFF6C3D4);
+  static const periodStripe = Color(0xFFE06A92);
+  static const tide = Color(0xFF14788A);
+  static const tideSoft = Color(0xFFD4F1F5);
+  static const tideDeep = Color(0xFF0E5664);
   static const darkHeroStart = Color(0xFF5C4046);
   static const darkHeroMid = Color(0xFF4E3E3C);
   static const darkHeroEnd = Color(0xFF3E4C45);
@@ -207,7 +213,7 @@ class CycleaTheme {
       bodyLarge: body.copyWith(fontSize: 16, color: scheme.onSurface),
       bodyMedium: body.copyWith(fontSize: 14, color: scheme.onSurface),
       bodySmall: body.copyWith(
-        fontSize: 12.5,
+        fontSize: 13,
         color: scheme.onSurfaceVariant,
         height: 1.4,
       ),

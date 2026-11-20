@@ -1,10 +1,9 @@
 import 'package:cyclea/domain/dates.dart';
 import 'package:cyclea/state/cycle_controller.dart';
 import 'package:cyclea/theme/cyclea_icons.dart';
-import 'package:cyclea/theme/cyclea_theme.dart';
 import 'package:cyclea/widgets/disclaimer_banner.dart';
+import 'package:cyclea/widgets/calendar_markers.dart';
 import 'package:cyclea/widgets/log_editor_sheet.dart';
-import 'package:cyclea/widgets/phase_chip.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -35,8 +34,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
     final stats = controller.stats;
     final selectedLog = controller.logOn(_selected);
     final futureDay = dateOnly(_selected).isAfter(dateOnly(DateTime.now()));
-    final scheme = Theme.of(context).colorScheme;
-
     return SafeArea(
       child: Align(
         alignment: Alignment.topCenter,
@@ -61,6 +58,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     ),
                   ),
                   FilledButton.tonal(
+                    style: const ButtonStyle(
+                      minimumSize: WidgetStatePropertyAll(Size(44, 48)),
+                      tapTargetSize: MaterialTapTargetSize.padded,
+                      visualDensity: VisualDensity.standard,
+                    ),
                     onPressed: () => showPeriodRangeDialog(context),
                     child: const Text('Log period range'),
                   ),
@@ -84,16 +86,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     formatButtonVisible: false,
                     titleCentered: true,
                   ),
-                  calendarStyle: CalendarStyle(
-                    todayDecoration: BoxDecoration(
-                      color: scheme.primary.withValues(alpha: 0.18),
-                      shape: BoxShape.circle,
-                    ),
-                    selectedDecoration: BoxDecoration(
-                      color: scheme.primary,
-                      shape: BoxShape.circle,
-                    ),
-                    todayTextStyle: TextStyle(color: scheme.onSurface),
+                  calendarStyle: const CalendarStyle(
+                    cellMargin: EdgeInsets.symmetric(vertical: 3),
+                    outsideDaysVisible: false,
                   ),
                   onDaySelected: (selected, focused) {
                     setState(() {
@@ -211,41 +206,46 @@ class _CalendarScreenState extends State<CalendarScreen> {
     final controller = AppScope.of(context);
     final log = controller.logOn(day);
     final prediction = controller.prediction;
-    Color? fill;
-    Color? border;
-    if (log != null && (log.isPeriod || log.flow.isBleeding)) {
-      fill = CycleaColors.rose.withValues(alpha: selected ? 1 : 0.85);
-    } else if (prediction.isFertile(day)) {
-      fill = CycleaColors.sage.withValues(alpha: 0.35);
-      border = CycleaColors.sage;
-    } else if (prediction.isPredictedPeriod(day)) {
-      fill = CycleaColors.sand.withValues(alpha: 0.4);
-      border = CycleaColors.sand;
-    } else if (prediction.isPredictedPeriodBand(day)) {
-      border = CycleaColors.sand.withValues(alpha: 0.7);
+    final logged = log != null && (log.isPeriod || log.flow.isBleeding);
+    final ovulation = !logged && prediction.isOvulation(day);
+    final predicted = !logged && prediction.isPredictedPeriod(day);
+    final fertile =
+        !logged && !predicted && (prediction.isFertile(day) || ovulation);
+    final band =
+        !logged &&
+        !fertile &&
+        !predicted &&
+        prediction.isPredictedPeriodBand(day);
+
+    bool shares(DateTime other) {
+      final otherLog = controller.logOn(other);
+      final otherLogged =
+          otherLog != null && (otherLog.isPeriod || otherLog.flow.isBleeding);
+      if (logged) return otherLogged;
+      final otherPredicted =
+          !otherLogged && prediction.isPredictedPeriod(other);
+      if (predicted) return otherPredicted;
+      final otherFertile =
+          !otherLogged &&
+          !otherPredicted &&
+          (prediction.isFertile(other) || prediction.isOvulation(other));
+      return (fertile || ovulation) && otherFertile;
     }
-    final textColor = fill != null && (log?.isPeriod ?? false)
-        ? Colors.white
-        : Theme.of(context).colorScheme.onSurface;
-    return Container(
-      margin: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        color: selected && fill == null
-            ? Theme.of(context).colorScheme.primary
-            : fill,
-        shape: BoxShape.circle,
-        border: border == null
-            ? null
-            : Border.all(color: border, width: today || selected ? 2 : 1),
-      ),
-      alignment: Alignment.center,
-      child: Text(
-        '${day.day}',
-        style: TextStyle(
-          color: selected && fill == null ? Colors.white : textColor,
-          fontWeight: today || selected ? FontWeight.w700 : FontWeight.w500,
-        ),
-      ),
+
+    final previous = day.subtract(const Duration(days: 1));
+    final following = day.add(const Duration(days: 1));
+    return CalendarDayMarker(
+      day: day.day,
+      logged: logged,
+      predicted: predicted,
+      fertile: fertile,
+      ovulation: ovulation,
+      band: band,
+      today: today,
+      selected: selected,
+      joinLeft: shares(previous),
+      joinRight: shares(following),
+      symptomDots: log?.symptomIds.length ?? 0,
     );
   }
 
@@ -253,6 +253,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
     final log = controller.logOn(day);
     if (log != null && log.isPeriod) {
       return 'Logged period · ${log.flow.label} flow';
+    }
+    if (controller.prediction.isOvulation(day)) {
+      return 'Estimated ovulation day. A calendar guess, not a test.';
     }
     if (controller.prediction.isFertile(day)) {
       return 'Inside the estimated fertile window (not contraception).';
