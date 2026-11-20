@@ -52776,7 +52776,7 @@ a1.anH(a8,s,h)
 m.restore()}else if(a1.d||a1.e){$.X()
 m=A.aU()
 m.r=f.gq(0)
-a8.dl(k,m)}else if(a1.f)a1.acx(a8,new A.h(a6/2,a2/2),h.dc(0.85))
+a8.dl(k,m)}else if(a1.f)a1.acx(a8,new A.h(a6/2,a2-5),h.dc(0.85))
 if(a1.e&&!o){m=a9.jL(B.i)
 a1.adf(a8,new A.h(m.a+0,m.b+-1),a3*0.22,g)}if(a1.r){o=s.cK(-1.2)
 q=q||n?8:r
@@ -52811,7 +52811,7 @@ acx(a,b,c){var s,r,q,p
 $.X()
 s=A.aU()
 s.r=c.gq(0)
-for(r=b.a,q=b.b+0,p=0;p<3;++p)a.f8(new A.h(r+B.Zw[p],q),2.2,s)},
+for(r=b.a,q=b.b+0,p=0;p<3;++p)a.f8(new A.h(r+B.Zw[p],q),1.7,s)},
 adf(a,b,c,d){var s,r,q,p,o,n
 $.X()
 s=A.aU()
@@ -112416,7 +112416,7 @@ B.Zu=s(["trimestrul I","trimestrul al II-lea","trimestrul al III-lea","trimestru
 B.xT=s(["D","L","M","M","G","V","S"],t.s)
 B.Zv=s(["\u0406 \u0442\u043e\u049b\u0441\u0430\u043d","\u0406\u0406 \u0442\u043e\u049b\u0441\u0430\u043d","\u0406\u0406\u0406 \u0442\u043e\u049b\u0441\u0430\u043d","IV \u0442\u043e\u049b\u0441\u0430\u043d"],t.s)
 B.jU=s(["\u1010\u1014\u1004\u103a\u1039\u1002\u1014\u103d\u1031","\u1010\u1014\u1004\u103a\u1039\u101c\u102c","\u1021\u1004\u103a\u1039\u1002\u102b","\u1017\u102f\u1012\u1039\u1013\u101f\u1030\u1038","\u1000\u103c\u102c\u101e\u1015\u1010\u1031\u1038","\u101e\u1031\u102c\u1000\u103c\u102c","\u1005\u1014\u1031"],t.s)
-B.Zw=s([-7,0,7],t.n)
+B.Zw=s([-6,0,6],t.n)
 B.Zx=s(["1. \u0442\u0440\u0438\u043c\u0435\u0441\u0435\u0447\u0438\u0435","2. \u0442\u0440\u0438\u043c\u0435\u0441\u0435\u0447\u0438\u0435","3. \u0442\u0440\u0438\u043c\u0435\u0441\u0435\u0447\u0438\u0435","4. \u0442\u0440\u0438\u043c\u0435\u0441\u0435\u0447\u0438\u0435"],t.s)
 B.xU=s(["N","P","\xda","S","\u010c","P","S"],t.s)
 B.Zy=s(["y, MMMM d, EEEE","y, MMMM d","y, MMM d","d/M/yy"],t.s)
